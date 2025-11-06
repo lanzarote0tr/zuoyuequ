@@ -1,4 +1,3 @@
-from __future__ import annotations
 import hashlib
 import os
 import sys
@@ -7,8 +6,7 @@ from pathlib import Path
 from textwrap import dedent
 
 REQUIREMENTS = [
-    "requests==2.30",
-    "rich>=13.7",
+    "PySide6"
 ]
 
 PIP_ARGS = [
@@ -19,22 +17,23 @@ PIP_ARGS = [
 PKG_DIR = Path(__file__).resolve().parent / "_pkgs"
 MARKER = PKG_DIR / ".requirements.hash"
 
-def _hash_requirements(reqs: list[str]) -> str:
+def _hash_requirements(reqs):
     canon = "\n".join(sorted(reqs)).encode("utf-8")
     return hashlib.sha256(canon).hexdigest()
 
-def _read_text(p: Path) -> str | None:
+def _read_text(path):
     try:
-        return p.read_text(encoding="utf-8")
+        return path.read_text(encoding="utf-8")
     except Exception:
         return None
 
-def _write_text(p: Path, s: str) -> None:
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(s, encoding="utf-8")
+def _write_text(path, s):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(s, encoding="utf-8")
 
-def _have_pip() -> bool:
+def _have_pip():
     try:
+        # TODO try not using sys.executable
         cp = subprocess.run([sys.executable, "-m", "pip", "--version"],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         return cp.returncode == 0
@@ -52,7 +51,7 @@ def _ensure_pip():
         print("You may need to install pip for this Python.", file=sys.stderr)
         sys.exit(1)
 
-def _need_install() -> bool:
+def _need_install():
     want = _hash_requirements(REQUIREMENTS)
     have = _read_text(MARKER)
     if not PKG_DIR.exists():
@@ -93,21 +92,16 @@ def _prepend_sys_path():
     sys.path.insert(0, str(PKG_DIR))
 
 def main():
-    """
-    === 3) Your application starts here ===
-    - You can import third-party packages that were just installed.
-    - You can import your own modules too.
-    """
-    from rich import print as rprint
-    import requests
+    from PySide6.QtWidgets import QApplication, QLabel
+    import sys
+    app = QApplication(sys.argv)
 
-    rprint("[bold green]Hello from one-file bootstrapper![/bold green]")
-    rprint(f"Using _pkgs at: [cyan]{PKG_DIR}[/cyan]")
+    label = QLabel("Hello, World!")
+    label.setWindowTitle("Hello Window")
+    label.resize(300, 200)
+    label.show()
 
-    r = requests.get("https://google.com", timeout=5)
-    rprint(f"requests ok? [yellow]{r.status_code}[/yellow]")
-
-
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     if sys.version_info < (3, 8):
@@ -119,8 +113,5 @@ if __name__ == "__main__":
 
     _prepend_sys_path()
 
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nInterrupted.")
+    main()
 
