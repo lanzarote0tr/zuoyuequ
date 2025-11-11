@@ -9,10 +9,6 @@ REQUIREMENTS = [
     "PySide6"
 ]
 
-PIP_ARGS = [
-    # "--index-url", "https://pypi.org/simple",
-    # "--no-cache-dir",
-]
 
 PKG_DIR = Path(__file__).resolve().parent / "_pkgs"
 MARKER = PKG_DIR / ".requirements.hash"
@@ -59,15 +55,15 @@ def _need_install():
     return want != have
 
 def _install():
-    if not REQUIREMENTS:
+    if not _need_install():
         return
+
     _ensure_pip()
 
     PKG_DIR.mkdir(parents=True, exist_ok=True)
 
     print(f"[bootstrap] Installing to {PKG_DIR} ...")
     cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)]
-    cmd += PIP_ARGS
     cmd += REQUIREMENTS
 
     # TODO On some systems pip warns about script locations; that's harmless
@@ -84,12 +80,9 @@ def _install():
         sys.exit(e.returncode)
 
     _write_text(MARKER, _hash_requirements(REQUIREMENTS))
-    print("[bootstrap] Dependencies ready.")
 
-def _prepend_sys_path():
-    # TODO Make our local packages take priority
-    # Disable this
-    sys.path.insert(0, str(PKG_DIR))
+    sys.path.insert(0, str(PKG_DIR)) # Fresh-installed packages TAKE PRIORITIEEEEEEEEEEEEEEEEEEEEEEEEE
+    print("[bootstrap] Dependencies ready.")
 
 def main():
     from PySide6.QtWidgets import QApplication, QLabel
@@ -104,14 +97,6 @@ def main():
     sys.exit(app.exec())
 
 if __name__ == "__main__":
-    if sys.version_info < (3, 8):
-        print("Python 3.8+ required.", file=sys.stderr)
-        sys.exit(1)
-
-    if _need_install():
-        _install()
-
-    _prepend_sys_path()
-
+    _install()
     main()
 
