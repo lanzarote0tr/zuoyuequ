@@ -1,54 +1,102 @@
+import hashlib
+import os
 import sys
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea
-from PySide6.QtGui import QPalette, QColor
-from PySide6.QtCore import Qt
+import subprocess
+from pathlib import Path
+from textwrap import dedent
 
-# A4 size in millimeters
-A4_WIDTH_MM = 210
-A4_HEIGHT_MM = 297
+REQUIREMENTS = [
+    "PySide6"
+]
 
-# Conversion: 1 inch = 25.4 mm, so 1 mm = dpi / 25.4 pixels
-def mm_to_px(mm, dpi):
-    return mm * dpi / 25.4
+
+PKG_DIR = Path(__file__).resolve().parent / "_pkgs"
+MARKER = PKG_DIR / ".requirements.hash"
+
+def _hash_requirements(reqs):
+    canon = "\n".join(sorted(reqs)).encode("utf-8")
+    return hashlib.sha256(canon).hexdigest()
+
+def _read_text(path):
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+def _write_text(path, s):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(s, encoding="utf-8")
+
+def _have_pip():
+    try:
+        # TODO try not using sys.executable
+        cp = subprocess.run([sys.executable, "-m", "pip", "--version"],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        return cp.returncode == 0
+    except Exception:
+        return False
+
+def _ensure_pip():
+    if _have_pip():
+        return
+    # TODO Fall back to ensurepip if pip is missing (works on CPython)
+    try:
+        subprocess.run([sys.executable, "-m", "ensurepip", "--upgrade"], check=True)
+    except Exception as e:
+        print("Failed to provision pip via ensurepip:", e, file=sys.stderr)
+        print("You may need to install pip for this Python.", file=sys.stderr)
+        sys.exit(1)
+
+def _need_install():
+    want = _hash_requirements(REQUIREMENTS)
+    have = _read_text(MARKER)
+    if not PKG_DIR.exists():
+        return True
+    return want != have
+
+def _install():
+    if not _need_install():
+        return
+
+    _ensure_pip()
+
+    PKG_DIR.mkdir(parents=True, exist_ok=True)
+
+    print(f"[bootstrap] Installing to {PKG_DIR} ...")
+    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)]
+    cmd += REQUIREMENTS
+
+    # TODO On some systems pip warns about script locations; that's harmless
+    env = os.environ.copy()
+    # TODO Avoid user site interfering
+    env.setdefault("PYTHONNOUSERSITE", "1")
+
+    try:
+        subprocess.run(cmd, check=True, env=env)
+    except subprocess.CalledProcessError as e:
+        print("\n[bootstrap] pip failed.", file=sys.stderr)
+        print("Command:", " ".join(cmd), file=sys.stderr)
+        print("Return code:", e.returncode, file=sys.stderr)
+        sys.exit(e.returncode)
+
+    _write_text(MARKER, _hash_requirements(REQUIREMENTS))
+
+    sys.path.insert(0, str(PKG_DIR)) # Fresh-installed packages TAKE PRIORITIEEEEEEEEEEEEEEEEEEEEEEEEE
+    print("[bootstrap] Dependencies ready.")
 
 def main():
+    from PySide6.QtWidgets import QApplication, QLabel
+    import sys
     app = QApplication(sys.argv)
 
-    screen = app.primaryScreen()
-    dpi = screen.logicalDotsPerInch() if screen else 96.0
+    label = QLabel("Hello, World!")
+    label.setWindowTitle("Hello Window")
+    label.resize(300, 200)
+    label.show()
 
-    width_px = int(mm_to_px(A4_WIDTH_MM, dpi))
-    height_px = int(mm_to_px(A4_HEIGHT_MM, dpi))
-
-    window = QWidget()
-    window.setWindowTitle(f"A4 Paper ({A4_WIDTH_MM}x{A4_HEIGHT_MM} mm, scrollable)")
-    layout = QVBoxLayout(window)
-
-    # Scroll area
-    scroll_area = QScrollArea()
-    scroll_area.setWidgetResizable(True)
-
-    # A4 page inside the scroll area
-    page = QWidget()
-    page.setFixedSize(width_px, height_px)
-    page.setAutoFillBackground(True)
-
-    pal = page.palette()
-    pal.setColor(QPalette.Window, QColor("white"))
-    page.setPalette(pal)
-    page.setStyleSheet("QWidget { border: 1px solid #000; }")
-
-    info = QLabel(f"DPI: {dpi:.2f}\nA4 size: {A4_WIDTH_MM}x{A4_HEIGHT_MM} mm -> {width_px}x{height_px} px")
-    info.setAlignment(Qt.AlignCenter)
-
-    scroll_area.setWidget(page)
-
-    layout.addWidget(info)
-    layout.addWidget(scroll_area)
-
-    window.show()
     sys.exit(app.exec())
 
 if __name__ == "__main__":
+    _install()
     main()
 
