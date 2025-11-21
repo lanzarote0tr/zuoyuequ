@@ -7,7 +7,7 @@ from pathlib import Path
 REQUIREMENTS = ["PySide6"]
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
 
-def bootstrapper():
+def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
     print(f"[bootstrapper] Checking dependencies at \"{PKG_DIR}\"...")
     # Check if already installed
     if PKG_DIR.exists():
@@ -37,10 +37,9 @@ def bootstrapper():
 
 def exception_importing(context="importing"):
     print(f"[{context}] Failed to import dependencies.", file=sys.stderr)
-    print("[tip] The program did not work as expected.", file=sys.stderr)
-    print("[tip] Try deleting the package directory and run again.", file=sys.stderr)
-    print("[tip] This will reinstall all dependencies.", file=sys.stderr)
-    print(f"[tip] Using packages from: {PKG_DIR}", file=sys.stderr)
+    print("[hint] The program did not work as expected.", file=sys.stderr)
+    print("[hint] If this keeps failing on your PC, delete the package folder and run it again.", file=sys.stderr)
+    print(f"[hint] Using packages from: {PKG_DIR}", file=sys.stderr)
     sys.exit(1)
 
 def get_nav_bar():
@@ -67,7 +66,7 @@ def get_nav_bar():
 
     nav_layout.addStretch() # Push buttons to the left
 
-    # Apply stylesheet for navigation buttons
+    # TODO: Better styles
     nav_style = """
         QPushButton {
             border: none;
