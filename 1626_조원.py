@@ -35,15 +35,26 @@ def bootstrapper():
         sys.exit(e.returncode)
     print("[bootstrapper] Dependencies ready.")
 
+def exception_importing(context="importing"):
+    print(f"[{context}] Failed to import dependencies.", file=sys.stderr)
+    print("[tip] The program did not work as expected.", file=sys.stderr)
+    print("[tip] Try deleting the package directory and run again.", file=sys.stderr)
+    print("[tip] This will reinstall all dependencies.", file=sys.stderr)
+    print(f"[tip] Using packages from: {PKG_DIR}", file=sys.stderr)
+    sys.exit(1)
+
 def get_nav_bar():
-    from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup
+    try:
+        from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup
+    except:
+        exception_importing("get_nav_bar")
     nav_bar = QWidget()
     nav_layout = QHBoxLayout(nav_bar)
     nav_layout.setContentsMargins(0, 0, 0, 0)
     nav_layout.setSpacing(0)
 
-    button_group = QButtonGroup(nav_bar) # Group for exclusive selection
-    button_group.setExclusive(True) # Only one button can be checked at a time
+    button_group = QButtonGroup(nav_bar)
+    button_group.setExclusive(True) # Exclusive selection
     buttons = []
     for idx, text in enumerate(["Home", "Score", "Publish"]):
         button = QPushButton(text)
@@ -81,12 +92,7 @@ def main():
         from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
         from PySide6.QtCore import Qt
     except:
-        print("[main] Failed to import PySide6. Did bootstrapping work?", file=sys.stderr)
-        print("[tip] If the program does not work as expected, ", file=sys.stderr)
-        print("[tip] try deleting the package directory and run again.", file=sys.stderr)
-        print("[tip] This will reinstall all dependencies.", file=sys.stderr)
-        print(f"[tip] Using packages from: {PKG_DIR}", file=sys.stderr)
-        sys.exit(1)
+        exception_importing("main")
 
     app = QApplication(sys.argv)
 
