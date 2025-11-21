@@ -38,7 +38,8 @@ def bootstrapper():
 def main():
     print("[main] Starting...")
     try:
-        from PySide6.QtWidgets import QApplication, QLabel
+        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
+        from PySide6.QtCore import Qt
     except ImportError as e:
         print("[main] Failed to import PySide6. Did bootstrapping work?", file=sys.stderr)
         print("[tip] If the program does not work as expected, ", file=sys.stderr)
@@ -48,10 +49,33 @@ def main():
         sys.exit(1)
 
     app = QApplication(sys.argv)
-    label = QLabel("Hello, World!")
-    label.setWindowTitle("Hello Window")
-    label.resize(300, 200)
-    label.show()
+
+    # 1. Create a main window to hold the layout
+    main_window = QWidget()
+    main_window.setWindowTitle("Window with Banner")
+    main_window.resize(400, 300)
+
+    # 2. Create a vertical layout manager
+    layout = QVBoxLayout(main_window)
+    layout.setContentsMargins(0, 0, 0, 0)  # Remove padding around the layout
+    layout.setSpacing(0)                   # Remove spacing between widgets
+
+    # 3. Create the top banner label
+    banner = QLabel("Top Banner")
+    banner.setStyleSheet("background-color: #3498db; color: white; font-size: 16px; padding: 10px;")
+    banner.setAlignment(Qt.AlignCenter)
+
+    # 4. Create the main content label
+    content_label = QLabel("Hello, World!")
+    content_label.setAlignment(Qt.AlignCenter)
+
+    # 5. Add the banner and content to the layout
+    layout.addWidget(banner)
+    layout.addWidget(content_label)
+    layout.setStretch(1, 1) # Allow the content_label to expand
+
+    # 6. Show the main window
+    main_window.show()
     sys.exit(app.exec())
 
 if __name__ == "__main__":
