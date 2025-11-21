@@ -45,7 +45,7 @@ def get_nav_bar():
     buttons = []
     for text in ["Home", "Score", "Publish"]:
         button = QPushButton(text)
-        button.setProperty("selected", "false")
+        button.setProperty("selected", "False")
         buttons.append(button)
         nav_layout.addWidget(button)
 
@@ -54,7 +54,7 @@ def get_nav_bar():
     def update_selection(selected_button):
         for btn in buttons:
             is_selected = (btn == selected_button)
-            btn.setProperty("selected", str(is_selected).lower())
+            btn.setProperty("selected", str(is_selected))
             # Force style refresh
             btn.style().unpolish(btn)
             btn.style().polish(btn)
@@ -76,7 +76,7 @@ def get_nav_bar():
         QPushButton:hover {
             background-color: #e0e0e0;
         }
-        QPushButton[selected="true"] {
+        QPushButton[selected="True"] {
             background-color: #aed6f1; /* light blue */
             border-bottom: 3px solid #2980b9; /* confident blue */
         }
@@ -101,7 +101,7 @@ def main():
 
     # 1. Main window
     main_window = QWidget()
-    main_window.setWindowTitle("Window with Banner")
+    main_window.setWindowTitle("Zuoyuequ")
 
     # 2. Vertical layout
     layout = QVBoxLayout(main_window)
