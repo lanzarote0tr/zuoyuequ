@@ -95,28 +95,28 @@ def main():
 
     app = QApplication(sys.argv)
 
-    # 1. Main window
+    # Main window
     main_window = QWidget()
     main_window.setWindowTitle("Zuoyuequ")
 
-    # 2. Vertical layout
+    # VSTACK
     layout = QVBoxLayout(main_window)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setSpacing(0)
 
-    # 3. Navigation bar
+    # VSTACK > Navigation bar
     nav_bar = get_nav_bar()
 
-    # 4. Main content
+    # VSTACK > Main content
     content_label = QLabel("Hello, World!")
     content_label.setAlignment(Qt.AlignCenter)
 
-    # 5. Widget arrangement
+    # Arrangement
     layout.addWidget(nav_bar)
     layout.addWidget(content_label)
     layout.setStretch(1, 1) 
 
-    # 6. Window display
+    # Render
     main_window.showMaximized()
     sys.exit(app.exec())
 
