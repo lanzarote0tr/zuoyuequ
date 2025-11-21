@@ -3,29 +3,23 @@ import sys
 import subprocess
 from pathlib import Path
 
+# Constants
 REQUIREMENTS = [
     "PySide6"
 ]
-
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
-MARKER = PKG_DIR / ".requirements.hash"
-
-def have_pip():
-    try:
-        import pip
-        return True
-    except ImportError:
-        return False
 
 def bootstrap():
     if PKG_DIR.exists():
         print(f"[bootstrap] {PKG_DIR} already exists, skipping installation.")
         return
-    if have_pip():
-        print("[bootstrap] pip is available.")
-    else:
-        print("[bootstrap] pip is not available, install pip and try again.")
+    try:
+        import pip
+    except ImportError:
+        print("[bootstrap] pip is not installed, install pip and try again.")
         return
+    
+    print("[bootstrap] pip is available.")
 
     PKG_DIR.mkdir(parents=True, exist_ok=True)
 
