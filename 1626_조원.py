@@ -35,31 +35,8 @@ def bootstrapper():
         sys.exit(e.returncode)
     print("[bootstrapper] Dependencies ready.")
 
-def main():
-    print("[main] Starting...")
-    try:
-        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
-        from PySide6.QtCore import Qt
-    except:
-        print("[main] Failed to import PySide6. Did bootstrapping work?", file=sys.stderr)
-        print("[tip] If the program does not work as expected, ", file=sys.stderr)
-        print("[tip] try deleting the package directory and run again.", file=sys.stderr)
-        print("[tip] This will reinstall all dependencies.", file=sys.stderr)
-        print(f"[tip] Using packages from: {PKG_DIR}", file=sys.stderr)
-        sys.exit(1)
-
-    app = QApplication(sys.argv)
-
-    # 1. Main window
-    main_window = QWidget()
-    main_window.setWindowTitle("Window with Banner")
-
-    # 2. Vertical layout
-    layout = QVBoxLayout(main_window)
-    layout.setContentsMargins(0, 0, 0, 0)
-    layout.setSpacing(0)
-
-    # 3. Navigation bar
+def get_nav_bar():
+    from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton
     nav_bar = QWidget()
     nav_layout = QHBoxLayout(nav_bar)
     nav_layout.setContentsMargins(0, 0, 0, 0)
@@ -71,6 +48,8 @@ def main():
         button.setProperty("selected", "false")
         buttons.append(button)
         nav_layout.addWidget(button)
+
+    nav_layout.addStretch() # Pushes buttons to the left
 
     def update_selection(selected_button):
         for btn in buttons:
@@ -103,6 +82,34 @@ def main():
         }
     """
     nav_bar.setStyleSheet(nav_style)
+    return nav_bar
+
+def main():
+    print("[main] Starting...")
+    try:
+        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
+        from PySide6.QtCore import Qt
+    except:
+        print("[main] Failed to import PySide6. Did bootstrapping work?", file=sys.stderr)
+        print("[tip] If the program does not work as expected, ", file=sys.stderr)
+        print("[tip] try deleting the package directory and run again.", file=sys.stderr)
+        print("[tip] This will reinstall all dependencies.", file=sys.stderr)
+        print(f"[tip] Using packages from: {PKG_DIR}", file=sys.stderr)
+        sys.exit(1)
+
+    app = QApplication(sys.argv)
+
+    # 1. Main window
+    main_window = QWidget()
+    main_window.setWindowTitle("Window with Banner")
+
+    # 2. Vertical layout
+    layout = QVBoxLayout(main_window)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(0)
+
+    # 3. Navigation bar
+    nav_bar = get_nav_bar()
 
     # 4. Main content
     content_label = QLabel("Hello, World!")
