@@ -38,7 +38,7 @@ def bootstrapper():
 def main():
     print("[main] Starting...")
     try:
-        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
+        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
         from PySide6.QtCore import Qt
     except:
         print("[main] Failed to import PySide6. Did bootstrapping work?", file=sys.stderr)
@@ -53,26 +53,65 @@ def main():
     # 1. Main window
     main_window = QWidget()
     main_window.setWindowTitle("Window with Banner")
-    # main_window.resize(400, 300) # Overrided by showMaximized()
 
     # 2. Vertical layout
     layout = QVBoxLayout(main_window)
-    layout.setContentsMargins(0, 0, 0, 0)  # Remove padding around the layout
-    layout.setSpacing(0)                   # Remove spacing between widgets
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(0)
 
-    # 3. Top banner
-    banner = QLabel("Top Banner")
-    banner.setStyleSheet("background-color: #3498db; color: white; font-size: 16px; padding: 10px;")
-    banner.setAlignment(Qt.AlignCenter)
+    # 3. Navigation bar
+    nav_bar = QWidget()
+    nav_layout = QHBoxLayout(nav_bar)
+    nav_layout.setContentsMargins(0, 0, 0, 0)
+    nav_layout.setSpacing(0)
+
+    buttons = []
+    for text in ["Home", "Score", "Publish"]:
+        button = QPushButton(text)
+        button.setProperty("selected", "false")
+        buttons.append(button)
+        nav_layout.addWidget(button)
+
+    def update_selection(selected_button):
+        for btn in buttons:
+            is_selected = (btn == selected_button)
+            btn.setProperty("selected", str(is_selected).lower())
+            # Force style refresh
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+
+    for button in buttons:
+        button.clicked.connect(lambda checked, b=button: update_selection(b))
+
+    # Set default selection
+    update_selection(buttons[0])
+
+    # Apply stylesheet for navigation buttons
+    nav_style = """
+        QPushButton {
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            background-color: #f0f0f0;
+        }
+        QPushButton:hover {
+            background-color: #e0e0e0;
+        }
+        QPushButton[selected="true"] {
+            background-color: #aed6f1; /* light blue */
+            border-bottom: 3px solid #2980b9; /* confident blue */
+        }
+    """
+    nav_bar.setStyleSheet(nav_style)
 
     # 4. Main content
     content_label = QLabel("Hello, World!")
     content_label.setAlignment(Qt.AlignCenter)
 
     # 5. Widget arrangement
-    layout.addWidget(banner)
+    layout.addWidget(nav_bar)
     layout.addWidget(content_label)
-    layout.setStretch(1, 1) # Allow the content_label to expand
+    layout.setStretch(1, 1) 
 
     # 6. Window display
     main_window.showMaximized()
