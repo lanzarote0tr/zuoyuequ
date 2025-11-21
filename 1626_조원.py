@@ -50,32 +50,32 @@ def main():
 
     app = QApplication(sys.argv)
 
-    # 1. Create a main window to hold the layout
+    # 1. Main window
     main_window = QWidget()
     main_window.setWindowTitle("Window with Banner")
-    main_window.resize(400, 300)
+    # main_window.resize(400, 300) # Overrided by showMaximized()
 
-    # 2. Create a vertical layout manager
+    # 2. Vertical layout
     layout = QVBoxLayout(main_window)
     layout.setContentsMargins(0, 0, 0, 0)  # Remove padding around the layout
     layout.setSpacing(0)                   # Remove spacing between widgets
 
-    # 3. Create the top banner label
+    # 3. Top banner
     banner = QLabel("Top Banner")
     banner.setStyleSheet("background-color: #3498db; color: white; font-size: 16px; padding: 10px;")
     banner.setAlignment(Qt.AlignCenter)
 
-    # 4. Create the main content label
+    # 4. Main content
     content_label = QLabel("Hello, World!")
     content_label.setAlignment(Qt.AlignCenter)
 
-    # 5. Add the banner and content to the layout
+    # 5. Widget arrangement
     layout.addWidget(banner)
     layout.addWidget(content_label)
     layout.setStretch(1, 1) # Allow the content_label to expand
 
-    # 6. Show the main window
-    main_window.show()
+    # 6. Window display
+    main_window.showMaximized()
     sys.exit(app.exec())
 
 if __name__ == "__main__":
