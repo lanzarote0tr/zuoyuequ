@@ -36,34 +36,25 @@ def bootstrapper():
     print("[bootstrapper] Dependencies ready.")
 
 def get_nav_bar():
-    from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton
+    from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup
     nav_bar = QWidget()
     nav_layout = QHBoxLayout(nav_bar)
     nav_layout.setContentsMargins(0, 0, 0, 0)
     nav_layout.setSpacing(0)
 
+    button_group = QButtonGroup(nav_bar) # Group for exclusive selection
+    button_group.setExclusive(True) # Only one button can be checked at a time
     buttons = []
-    for text in ["Home", "Score", "Publish"]:
+    for idx, text in enumerate(["Home", "Score", "Publish"]):
         button = QPushButton(text)
-        button.setProperty("selected", "False")
+        button.setCheckable(True)
         buttons.append(button)
         nav_layout.addWidget(button)
+        button_group.addButton(button, idx)
+        if idx == 0:
+            button.setChecked(True)
 
-    nav_layout.addStretch() # Pushes buttons to the left
-
-    def update_selection(selected_button):
-        for btn in buttons:
-            is_selected = (btn == selected_button)
-            btn.setProperty("selected", str(is_selected))
-            # Force style refresh
-            btn.style().unpolish(btn)
-            btn.style().polish(btn)
-
-    for button in buttons:
-        button.clicked.connect(lambda checked, b=button: update_selection(b))
-
-    # Set default selection
-    update_selection(buttons[0])
+    nav_layout.addStretch() # Push buttons to the left
 
     # Apply stylesheet for navigation buttons
     nav_style = """
@@ -76,7 +67,7 @@ def get_nav_bar():
         QPushButton:hover {
             background-color: #e0e0e0;
         }
-        QPushButton[selected="True"] {
+        QPushButton:checked {
             background-color: #aed6f1; /* light blue */
             border-bottom: 3px solid #2980b9; /* confident blue */
         }
