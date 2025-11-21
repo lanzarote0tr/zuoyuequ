@@ -4,26 +4,26 @@ import subprocess
 from pathlib import Path
 
 # Constants
-REQUIREMENTS = [
-    "PySide6"
-]
+REQUIREMENTS = ["PySide6"]
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
 
-def bootstrap():
+def bootstrapper():
+    print(f"[bootstrapper] Bootstrapping dependencies into \"{PKG_DIR}\" ...")
+    print(f"[bootstrapper] Requirements: {REQUIREMENTS}")
+
     if PKG_DIR.exists():
-        print(f"[bootstrap] {PKG_DIR} already exists, skipping installation.")
+        print(f"[bootstrapper] {PKG_DIR} already exists, skipping installation.")
         return
+
     try:
         import pip
     except ImportError:
-        print("[bootstrap] pip is not installed, install pip and try again.")
+        print("[bootstrapper] pip is not installed, install pip and try again.")
         return
-    
-    print("[bootstrap] pip is available.")
+    print("[bootstrapper] pip is available.")
 
     PKG_DIR.mkdir(parents=True, exist_ok=True)
-
-    print(f"[bootstrap] Installing to {PKG_DIR} ...")
+    print(f"[bootstrapper] Installing to \"{PKG_DIR}\" ...")
     cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)]
     cmd += REQUIREMENTS
 
@@ -35,7 +35,7 @@ def bootstrap():
     try:
         subprocess.run(cmd, check=True, env=env)
     except subprocess.CalledProcessError as e:
-        print("\n[bootstrap] pip failed.", file=sys.stderr)
+        print("\n[bootstrapper] pip failed.", file=sys.stderr)
         print("Command:", " ".join(cmd), file=sys.stderr)
         print("Return code:", e.returncode, file=sys.stderr)
         sys.exit(e.returncode)
@@ -44,8 +44,18 @@ def bootstrap():
     print("[bootstrap] Dependencies ready.")
 
 def main():
-    from PySide6.QtWidgets import QApplication, QLabel
-    import sys
+    print("[main] Starting main application ...")
+    try:
+        from PySide6.QtWidgets import QApplication, QLabel
+        import sys
+    except ImportError as e:
+        print("[main] Failed to import PySide6. Did bootstrapping work?", file=sys.stderr)
+        print("ImportError:", e, file=sys.stderr)
+        print("[tip] If the program does not work as expected, ")
+        print("[tip] try deleting the package directory and run again.")
+        print("[tip] This will reinstall all dependencies.")
+        print(f"[tip] Using packages from: {PKG_DIR}")
+        sys.exit(1)
     app = QApplication(sys.argv)
 
     label = QLabel("Hello, World!")
