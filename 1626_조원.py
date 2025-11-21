@@ -40,7 +40,7 @@ def main():
     try:
         from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
         from PySide6.QtCore import Qt
-    except ImportError as e:
+    except:
         print("[main] Failed to import PySide6. Did bootstrapping work?", file=sys.stderr)
         print("[tip] If the program does not work as expected, ", file=sys.stderr)
         print("[tip] try deleting the package directory and run again.", file=sys.stderr)
