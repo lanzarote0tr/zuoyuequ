@@ -42,7 +42,7 @@ def exception_importing(context="importing"):
     print(f"[hint] Using packages from: {PKG_DIR}", file=sys.stderr)
     sys.exit(1)
 
-def get_nav_bar():
+def get_nav_bar(view_switcher):
     try:
         from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup
     except:
@@ -83,7 +83,9 @@ def get_nav_bar():
         }
     """
     nav_bar.setStyleSheet(nav_style)
-    return nav_bar, button_group
+    # Button click handling
+    button_group.idClicked.connect(view_switcher.setCurrentIndex)
+    return nav_bar
 
 def main():
     print("[main] Starting...")
@@ -104,34 +106,30 @@ def main():
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setSpacing(0)
 
-    # VSTACK > Navigation bar
-    nav_bar_widget, btn_group = get_nav_bar()
+    # VSTACK > View Switcher
+    view_switcher = QStackedWidget()
 
-    # View Switcher
-    stack = QStackedWidget()
-
-    # Home View
+    # View > Home
     home_label = QLabel("Welcome to the Home Page")
     home_label.setAlignment(Qt.AlignCenter)
-    stack.addWidget(home_label)
+    view_switcher.addWidget(home_label)
 
-    # Score View
+    # View > Score
     score_label = QLabel("This is the Score Page")
     score_label.setAlignment(Qt.AlignCenter)
-    stack.addWidget(score_label)
+    view_switcher.addWidget(score_label)
 
-    # Publish View
+    # View > Publish
     publish_label = QLabel("Welcome to the Publish Page")
     publish_label.setAlignment(Qt.AlignCenter)
-    stack.addWidget(publish_label)
+    view_switcher.addWidget(publish_label)
 
-    # Button click handling
-    btn_group.idClicked.connect(stack.setCurrentIndex)
+    nav_bar = get_nav_bar(view_switcher)
 
     # Arrangement
-    layout.addWidget(nav_bar_widget)
-    layout.addWidget(stack)
-    # layout.setStretch(1, 1) 
+    layout.addWidget(nav_bar)
+    layout.addWidget(view_switcher)
+    layout.setStretch(1, 1) 
 
     # Render
     main_window.showMaximized()
