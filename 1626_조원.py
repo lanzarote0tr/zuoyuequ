@@ -83,12 +83,12 @@ def get_nav_bar():
         }
     """
     nav_bar.setStyleSheet(nav_style)
-    return nav_bar
+    return nav_bar, button_group
 
 def main():
     print("[main] Starting...")
     try:
-        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
+        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QStackedWidget
         from PySide6.QtCore import Qt
     except:
         exception_importing("main")
@@ -105,16 +105,33 @@ def main():
     layout.setSpacing(0)
 
     # VSTACK > Navigation bar
-    nav_bar = get_nav_bar()
+    nav_bar_widget, btn_group = get_nav_bar()
 
-    # VSTACK > Main content
-    content_label = QLabel("Hello, World!")
-    content_label.setAlignment(Qt.AlignCenter)
+    # View Switcher
+    stack = QStackedWidget()
+
+    # Home View
+    home_label = QLabel("Welcome to the Home Page")
+    home_label.setAlignment(Qt.AlignCenter)
+    stack.addWidget(home_label)
+
+    # Score View
+    score_label = QLabel("This is the Score Page")
+    score_label.setAlignment(Qt.AlignCenter)
+    stack.addWidget(score_label)
+
+    # Publish View
+    publish_label = QLabel("Welcome to the Publish Page")
+    publish_label.setAlignment(Qt.AlignCenter)
+    stack.addWidget(publish_label)
+
+    # Button click handling
+    btn_group.idClicked.connect(stack.setCurrentIndex)
 
     # Arrangement
-    layout.addWidget(nav_bar)
-    layout.addWidget(content_label)
-    layout.setStretch(1, 1) 
+    layout.addWidget(nav_bar_widget)
+    layout.addWidget(stack)
+    # layout.setStretch(1, 1) 
 
     # Render
     main_window.showMaximized()
