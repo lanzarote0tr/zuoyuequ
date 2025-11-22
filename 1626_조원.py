@@ -69,7 +69,7 @@ def get_nav_bar(view_switcher):
     # TODO: Better styles
     nav_style = """
         QPushButton {
-            border: none;
+            border: 3px solid transparent;
             padding: 10px;
             font-size: 14px;
             background-color: #f0f0f0;
