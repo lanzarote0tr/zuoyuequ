@@ -87,10 +87,73 @@ def get_nav_bar(view_switcher):
     button_group.idClicked.connect(view_switcher.setCurrentIndex)
     return nav_bar
 
+def get_score():
+    try:
+        from PySide6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QVBoxLayout, QHBoxLayout, QPushButton, QGraphicsRectItem
+        from PySide6.QtGui import QBrush, QColor
+    except:
+        print("Error importing PySide6 modules.")
+        return None
+
+    # 1. Create the main generic widget
+    widget = QWidget()
+    
+    # Change main background to grey
+    widget.setStyleSheet("background-color: grey;")
+
+    # Use a layout to position the inner view
+    layout = QVBoxLayout(widget)
+    
+    # FIX: Remove the default layout margins (usually ~11px)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(0)
+
+    # --- TOP BAR ---
+    top_bar = QWidget()
+    top_bar.setStyleSheet("background-color: #d0d0d0; border-bottom: 1px solid #555;")
+    top_bar_layout = QHBoxLayout(top_bar)
+    top_bar_layout.setContentsMargins(5, 5, 5, 5) 
+    
+    for label in ["A", "B", "C"]:
+        btn = QPushButton(label)
+        top_bar_layout.addWidget(btn)
+    
+    top_bar_layout.addStretch()
+    layout.addWidget(top_bar)
+
+    # 2. Make a new GraphicsScene
+    scene = QGraphicsScene()
+    
+    # CRITICAL FIX 1: Set a fixed size for the world so we have a coordinate system
+    # This creates a 500x500 stage starting at 0,0
+    scene.setSceneRect(0, 0, 500, 500) 
+
+    # --- Add Blue Box ---
+    # Create a rectangle at x=50, y=50 with width=100, height=100
+    blue_box = QGraphicsRectItem(50, 50, 100, 100)
+    blue_box.setBrush(QBrush(QColor("blue")))
+    scene.addItem(blue_box)
+
+    # 3. Create the View to display the Scene
+    view = QGraphicsView(scene)
+    
+    # CRITICAL FIX 2: Prevent Garbage Collection!
+    # We must keep a reference to the scene attached to the view or widget.
+    # Otherwise, Python deletes 'scene' as soon as this function ends.
+    view.scene_reference = scene 
+    
+    # Set the view to white so you can see it against the grey
+    view.setStyleSheet("background-color: white; border: 1px solid black;")
+
+    # Add the view to the widget
+    layout.addWidget(view)
+    
+    return widget
+
 def main():
     print("[main] Starting...")
     try:
-        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QStackedWidget
+        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QStackedWidget, QSizePolicy
         from PySide6.QtCore import Qt
     except:
         exception_importing("main")
@@ -115,9 +178,10 @@ def main():
     view_switcher.addWidget(home_label)
 
     # View > Score
-    score_label = QLabel("This is the Score Page")
-    score_label.setAlignment(Qt.AlignCenter)
-    view_switcher.addWidget(score_label)
+    score = get_score()
+    score.setMinimumSize(900, 1200)  # Ensure it's visible and large enough
+    score.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    view_switcher.addWidget(score)
 
     # View > Publish
     publish_label = QLabel("Welcome to the Publish Page")
