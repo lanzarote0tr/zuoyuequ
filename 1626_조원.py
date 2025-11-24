@@ -90,65 +90,67 @@ def get_nav_bar(view_switcher):
 def get_score():
     try:
         from PySide6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QVBoxLayout, QHBoxLayout, QPushButton, QGraphicsRectItem
-        from PySide6.QtGui import QBrush, QColor
+        from PySide6.QtGui import QBrush, QColor, QPainter
+        from PySide6.QtCore import Qt, QObject, QEvent
     except:
         print("Error importing PySide6 modules.")
         return None
 
-    # 1. Create the main generic widget
-    widget = QWidget()
+    score_tab = QWidget()
+    score_tab.setStyleSheet("background-color: grey;")
     
-    # Change main background to grey
-    widget.setStyleSheet("background-color: grey;")
-
-    # Use a layout to position the inner view
-    layout = QVBoxLayout(widget)
-    
-    # FIX: Remove the default layout margins (usually ~11px)
+    layout = QVBoxLayout(score_tab)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setSpacing(0)
 
-    # --- TOP BAR ---
     top_bar = QWidget()
-    top_bar.setStyleSheet("background-color: #d0d0d0; border-bottom: 1px solid #555;")
+    top_bar.setStyleSheet("background-color: #d0d0d0;")
     top_bar_layout = QHBoxLayout(top_bar)
-    top_bar_layout.setContentsMargins(5, 5, 5, 5) 
-    
+    top_bar_layout.setContentsMargins(5, 5, 5, 5)
     for label in ["A", "B", "C"]:
         btn = QPushButton(label)
         top_bar_layout.addWidget(btn)
-    
     top_bar_layout.addStretch()
     layout.addWidget(top_bar)
 
-    # 2. Make a new GraphicsScene
-    scene = QGraphicsScene()
+    score = QGraphicsScene()
     
-    # CRITICAL FIX 1: Set a fixed size for the world so we have a coordinate system
-    # This creates a 500x500 stage starting at 0,0
-    scene.setSceneRect(0, 0, 500, 500) 
+    score.setSceneRect(-2500, -2500, 5000, 5000)
 
-    # --- Add Blue Box ---
-    # Create a rectangle at x=50, y=50 with width=100, height=100
-    blue_box = QGraphicsRectItem(50, 50, 100, 100)
+    blue_box = QGraphicsRectItem(0, 0, 100, 100)
     blue_box.setBrush(QBrush(QColor("blue")))
-    scene.addItem(blue_box)
-
-    # 3. Create the View to display the Scene
-    view = QGraphicsView(scene)
     
-    # CRITICAL FIX 2: Prevent Garbage Collection!
-    # We must keep a reference to the scene attached to the view or widget.
-    # Otherwise, Python deletes 'scene' as soon as this function ends.
-    view.scene_reference = scene 
-    
-    # Set the view to white so you can see it against the grey
-    view.setStyleSheet("background-color: white; border: 1px solid black;")
+    score.addItem(blue_box)
 
-    # Add the view to the widget
+    view = QGraphicsView(score)
+    view.setStyleSheet("background-color: white; border: none;")
+    
+    view.setRenderHint(QPainter.Antialiasing)
+    view.setDragMode(QGraphicsView.ScrollHandDrag)
+    view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+
+    class WheelZoom(QObject):
+        def eventFilter(self, obj, event):
+            if event.type() == QEvent.Wheel:
+                zoom_factor = 1.15
+                if event.angleDelta().y() > 0:
+                    view.scale(zoom_factor, zoom_factor)
+                else:
+                    view.scale(1 / zoom_factor, 1 / zoom_factor)
+                return True 
+            return False
+
+    zoom_filter = WheelZoom()
+    view.viewport().installEventFilter(zoom_filter)
+
+    view.my_scene_ref = score
+    view.my_filter_ref = zoom_filter
+
+    view.centerOn(blue_box)
+
     layout.addWidget(view)
     
-    return widget
+    return score_tab
 
 def main():
     print("[main] Starting...")
