@@ -66,20 +66,19 @@ def get_nav_bar(view_switcher):
 
     nav_layout.addStretch() # Push buttons to the left
 
-    # TODO: Better styles
     nav_style = """
         QPushButton {
             border: 3px solid transparent;
             padding: 10px;
             font-size: 14px;
-            background-color: #f0f0f0;
+            background-color: #f5f5f6;
         }
         QPushButton:hover {
-            background-color: #e0e0e0;
+            background-color: #e2e5e9;
         }
         QPushButton:checked {
-            background-color: #aed6f1; /* light blue */
-            border-bottom: 3px solid #2980b9; /* confident blue */
+            background-color: #e5eef5;
+            border-bottom: 3px solid #5ab1ef;
         }
     """
     nav_bar.setStyleSheet(nav_style)
@@ -93,7 +92,9 @@ def get_home():
         from PySide6.QtCore import Qt
     except:
         exception_importing("get_home")
+
     home_tab = QWidget()
+    home_tab.setStyleSheet("background-color: #e5e9ed;")
 
     # VSTACK
     home_layout = QVBoxLayout(home_tab)
@@ -107,22 +108,17 @@ def get_home():
     # New Score Button
     new_score_button = QPushButton("New Score")
     new_score_button.setIcon(home_tab.style().standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton))
-    # new_score_button.setFixedSize(120, 40)
     new_score_button.setStyleSheet("""
         QPushButton {
-            height: 40px;
+            height: 50px;
             font-size: 16px;
-            padding: 10px 20px;
-            background-color: #27ae60;
-            color: white;
             border: none;
             border-radius: 5px;
+            text-align: left;
+            padding-left: 12px;
         }
         QPushButton:hover {
-            background-color: #2ecc71;
-        }
-        QPushButton:pressed {
-            background-color: #219150;
+            background-color: #e2e5e9;
         }
     """)
     home_layout.addWidget(new_score_button)
