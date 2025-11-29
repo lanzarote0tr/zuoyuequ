@@ -4,29 +4,63 @@ import subprocess
 from pathlib import Path
 
 # Constants
-REQUIREMENTS = ["PySide6"]
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
 ASSETS_DIR = Path(__file__).resolve().parent / "_1626_assets"
 NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
+V_TAG="abcdef"
 
-def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
+def v_check():
+    try:
+        import requests
+    except:
+        exception_importing("v_check")
+    try:
+        res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt", timeout=5)
+        res.raise_for_status()
+        res = res.text
+        if res and res != V_TAG:
+            print("[v_check] v_tag reload...")
+            try:
+                res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
+                res.raise_for_status()
+                res = res.text
+                with open(os.path.abspath(__file__), 'w', encoding='utf-8') as f:
+                    f.write(res)
+                print("[!] Please re-run the program.")
+                sys.exit(0)
+            except Exception as e:
+                print(f"[v_check] Failed to fetch, contact the developer: {e}", file=sys.stderr)
+                print("[hint] The program did not work as expected.", file=sys.stderr)
+                print("[hint] Check the internet connection and try again.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            return
+    except requests.RequestException as e:
+        print(f"[v_check] Failed to check v_tag, contact the developer: {e}", file=sys.stderr)
+        print("[hint] The program did not work as expected.", file=sys.stderr)
+        print("[hint] Check the internet connection and try again.", file=sys.stderr)
+        sys.exit(1)
+
+def bootstrapper(requirements): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
     print(f"[bootstrapper] Checking dependencies at \"{PKG_DIR}\"...")
     # Check if already installed
-    if PKG_DIR.exists():
+    '''
+    if PKG_DIR.exists(): # TODO: Check specific packages?
         print(f"[bootstrapper] {PKG_DIR} already exists, skipping installation.")
         return
+    '''
     # Check for pip
     try:
         import pip
-    except ImportError:
+    except:
         print("[bootstrapper] pip is not installed, install pip and try again.", file=sys.stderr)
         return
     print("[bootstrapper] pip is available.")
     # Install packages
     PKG_DIR.mkdir(parents=True, exist_ok=True)
     print(f"[bootstrapper] Installing to \"{PKG_DIR}\"...")
-    print(f"[bootstrapper] Requirements: {REQUIREMENTS}")
-    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)] + REQUIREMENTS
+    print(f"[bootstrapper] Requirements: {requirements}")
+    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)] + requirements
     try:
         # Prevent conflicts with packages from the main Python environment.
         install_env = os.environ.copy()
@@ -223,6 +257,7 @@ def main():
             self._draw_paper_and_staves()
             self._create_cursor()
 
+
         def _setup_toolbar(self):
             top_bar = QWidget()
             top_bar.setStyleSheet("background-color: #d0d0d0;")
@@ -326,6 +361,9 @@ def main():
     sys.exit(app.exec())
 
 if __name__ == "__main__":
-    bootstrapper()
+    bootstrapper(["requests"])
+    sys.path.insert(0, str(PKG_DIR))
+    v_check()
+    bootstrapper(["PySide6"])
     sys.path.insert(0, str(PKG_DIR))
     main()
