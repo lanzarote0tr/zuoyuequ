@@ -6,7 +6,7 @@ from pathlib import Path
 # Constants
 REQUIREMENTS = ["PySide6"]
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
-NEW_SCORE_ICON = PKG_DIR / "new_score.png" # TODO: Fetch from resources
+NEW_SCORE_ICON = PKG_DIR / "new_score.svg" # TODO: Fetch from resources
 
 def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
     print(f"[bootstrapper] Checking dependencies at \"{PKG_DIR}\"...")
@@ -90,6 +90,7 @@ def get_nav_bar(view_switcher):
 def get_home():
     try:
         from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QStyle
+        from PySide6.QtCore import QSize
         from PySide6.QtGui import QIcon
     except:
         exception_importing("get_home")
@@ -109,9 +110,10 @@ def get_home():
     # New Score Button
     new_score_button = QPushButton("New Score")
     new_score_button.setIcon(QIcon(str(NEW_SCORE_ICON)))
+    new_score_button.setIconSize(QSize(32, 32))
     new_score_button.setStyleSheet("""
         QPushButton {
-            height: 50px;
+            height: 80px;
             font-size: 16px;
             border: none;
             border-radius: 5px;
