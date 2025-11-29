@@ -28,7 +28,7 @@ def v_check():
             print(f"[v_check] Could not read v_file: {e}", file=sys.stderr)
     
     try:
-        res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/v.txt", timeout=5)
+        res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt", timeout=5)
         res.raise_for_status()
         res = res.text
         if res and res != V_TAG:
@@ -42,7 +42,13 @@ def v_check():
                 with open(ASSETS_DIR / "v.py", 'w', encoding='utf-8') as f:
                     f.write(file)
                 shutil.copy(ASSETS_DIR / "v.py", sys.argv[0])
-                return
+                shutil.rmtree(PKG_DIR, ignore_errors=True)
+                ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+                with open(ASSETS_DIR / "v.txt", 'w', encoding='utf-8') as f:
+                    f.write(V_TAG)
+                bootstrapper(["PySide6"])
+                print("[!] Please re-run the program.")
+                sys.exit(0)
             except Exception as e:
                 print(f"[v_check] Failed to fetch, contact the developer: {e}", file=sys.stderr)
                 print("[hint] The program did not work as expected.", file=sys.stderr)
@@ -56,21 +62,7 @@ def v_check():
         print("[hint] Check the internet connection and try again.", file=sys.stderr)
         sys.exit(1)
 
-def v_cleanup():
-    global V_TAG
-    try:
-        import shutil
-    except:
-        exception_importing("v_cleanup")
-    shutil.rmtree(PKG_DIR, ignore_errors=True)
-    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-    with open(ASSETS_DIR / "v.txt", 'w', encoding='utf-8') as f:
-        f.write(V_TAG)
-    bootstrapper(["PySide6"])
-    print("[!] Please re-run the program.")
-
 def bootstrapper(requirements): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
-    print(f"[bootstrapper] Checking dependencies at \"{PKG_DIR}\"...")
     # Check if already installed
     '''
     if PKG_DIR.exists(): # TODO: Check specific packages?
@@ -397,6 +389,5 @@ if __name__ == "__main__":
     sys.path.insert(0, str(PKG_DIR))
     bootstrapper(["requests"])
     v_check()
-    v_cleanup()
     bootstrapper(["PySide6"])
     main()
