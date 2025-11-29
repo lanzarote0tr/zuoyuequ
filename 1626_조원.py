@@ -32,8 +32,8 @@ def v_check():
         res.raise_for_status()
         res = res.text
         if res and res != V_TAG:
+            V_TAG = res
             print("[v_check] v_tag reload...")
-            # Remove ASSETS_DIR
             try:
                 file = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
                 file.raise_for_status()
@@ -42,7 +42,7 @@ def v_check():
                 with open(ASSETS_DIR / "v.py", 'w', encoding='utf-8') as f:
                     f.write(file)
                 shutil.copy(ASSETS_DIR / "v.py", sys.argv[0])
-                sys.exit(0)
+                return
             except Exception as e:
                 print(f"[v_check] Failed to fetch, contact the developer: {e}", file=sys.stderr)
                 print("[hint] The program did not work as expected.", file=sys.stderr)
