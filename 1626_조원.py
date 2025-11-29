@@ -90,44 +90,72 @@ def get_nav_bar(view_switcher):
 
 def get_home():
     try:
-        from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QStyle
-        from PySide6.QtCore import QSize
-        from PySide6.QtGui import QIcon
+        from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
+        from PySide6.QtCore import QSize, Qt
+        from PySide6.QtGui import QIcon, QMouseEvent
     except:
         exception_importing("get_home")
 
+    class ClickableButton(QWidget):
+        def __init__(self, icon_path, text, parent=None):
+            super().__init__(parent)
+            self.setCursor(Qt.PointingHandCursor)
+            self.setStyleSheet("""
+                QWidget {
+                    background-color: #f5f5f6;
+                    border-radius: 5px;
+                    height: 100px;
+                }
+            """)
+            self.default_style = """
+                QWidget {
+                    background-color: #f5f5f6;
+                    border-radius: 5px;
+                }
+            """
+            self.hover_style = """
+                QWidget {
+                    background-color: #e2e5e9;
+                    border-radius: 5px;
+                }
+            """
+            layout = QHBoxLayout(self)
+            layout.setContentsMargins(24, 0, 0, 0)
+            layout.setSpacing(16)
+            icon_label = QLabel()
+            icon_pix = QIcon(str(icon_path)).pixmap(QSize(32, 32))
+            icon_label.setPixmap(icon_pix)
+            text_label = QLabel(text)
+            text_label.setStyleSheet("font-size: 20px;")
+            
+            layout.addWidget(icon_label)
+            layout.addWidget(text_label)
+            layout.addStretch()
+
+        def enterEvent(self, event):
+            self.setStyleSheet(self.hover_style)
+
+        def leaveEvent(self, event):
+            self.setStyleSheet(self.default_style)
+
+        def mousePressEvent(self, event: QMouseEvent):
+            # TODO: Add your button click logic here
+            print("New Score button clicked!")
+
     home_tab = QWidget()
     home_tab.setStyleSheet("background-color: #e5e9ed;")
-
-    # VSTACK
     home_layout = QVBoxLayout(home_tab)
     home_layout.setContentsMargins(50, 100, 50, 0)
 
-    # Scores Label
     scores_label = QLabel("Scores")
     scores_label.setStyleSheet("font-size: 24px; font-weight: bold;")
     home_layout.addWidget(scores_label)
 
-    # New Score Button
-    new_score_button = QPushButton("New Score")
-    new_score_button.setIcon(QIcon(str(NEW_SCORE_ICON)))
-    new_score_button.setIconSize(QSize(32, 32))
-    new_score_button.setStyleSheet("""
-        QPushButton {
-            height: 80px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            text-align: left;
-            padding-left: 12px;
-        }
-        QPushButton:hover {
-            background-color: #e2e5e9;
-        }
-    """)
+    # Use the custom button
+    new_score_button = ClickableButton(NEW_SCORE_ICON, "New Score")
     home_layout.addWidget(new_score_button)
 
-    home_layout.addStretch() # Push content to the top
+    home_layout.addStretch()
     return home_tab
 
 def get_score():
