@@ -6,7 +6,8 @@ from pathlib import Path
 # Constants
 REQUIREMENTS = ["PySide6"]
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
-NEW_SCORE_ICON = PKG_DIR / "new_score.svg" # TODO: Fetch from resources
+ASSETS_DIR = Path(__file__).resolve().parent / "_1626_assets"
+NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
 
 def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
     print(f"[bootstrapper] Checking dependencies at \"{PKG_DIR}\"...")
