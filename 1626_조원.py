@@ -96,6 +96,15 @@ def get_home():
     except:
         exception_importing("get_home")
 
+    home_tab = QWidget()
+    home_tab.setStyleSheet("background-color: #e5e9ed;")
+    home_layout = QVBoxLayout(home_tab)
+    home_layout.setContentsMargins(50, 100, 50, 0)
+
+    scores_label = QLabel("Scores")
+    scores_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;")
+    home_layout.addWidget(scores_label)
+
     class ClickableButton(QWidget):
         def __init__(self, icon_path, text, parent=None):
             super().__init__(parent)
@@ -115,7 +124,7 @@ def get_home():
             """
             self.hover_style = """
                 #ClickableButton {
-                    background-color: #e2e5e9;
+                    background-color: #dAdfe6;
                     border-radius: 5px;
                 }
                 #ClickableButton QLabel {
@@ -143,57 +152,62 @@ def get_home():
 
         def mousePressEvent(self, event: QMouseEvent):
             print("New Score button clicked!")
-
-    home_tab = QWidget()
-    home_tab.setStyleSheet("background-color: #e5e9ed;")
-    home_layout = QVBoxLayout(home_tab)
-    home_layout.setContentsMargins(50, 100, 50, 0)
-
-    scores_label = QLabel("Scores")
-    scores_label.setStyleSheet("font-size: 24px; font-weight: bold;")
-    home_layout.addWidget(scores_label)
-
-    # Use the custom button
     new_score_button = ClickableButton(NEW_SCORE_ICON, "New Score")
     home_layout.addWidget(new_score_button)
 
     home_layout.addStretch()
     return home_tab
 
-def get_score():
+def get_graphics():
     try:
-        from PySide6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QVBoxLayout, QHBoxLayout, QPushButton, QGraphicsRectItem
-        from PySide6.QtGui import QBrush, QColor, QPainter
-        from PySide6.QtCore import Qt, QObject, QEvent
+        from PySide6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsLineItem
+        from PySide6.QtGui import QBrush, QColor, QPainter, QPen, Qt
+        from PySide6.QtCore import QObject, QEvent
     except:
         exception_importing("get_score")
-
-    score_tab = QWidget()
-    score_tab.setStyleSheet("background-color: grey;")
-    
-    score_layout = QVBoxLayout(score_tab)
-    score_layout.setContentsMargins(0, 0, 0, 0)
-    score_layout.setSpacing(0)
-
-    top_bar = QWidget()
-    top_bar.setStyleSheet("background-color: #d0d0d0;")
-    top_bar_layout = QHBoxLayout(top_bar)
-    top_bar_layout.setContentsMargins(5, 5, 5, 5)
-    for label in ["A", "B", "C"]:
-        btn = QPushButton(label)
-        top_bar_layout.addWidget(btn)
-    top_bar_layout.addStretch()
-    score_layout.addWidget(top_bar)
 
     score = QGraphicsScene()
     score.setSceneRect(-2500, -2500, 5000, 5000)
 
-    paper = QGraphicsRectItem(0, 0, 794, 1123) # A4 at 96 DPI
+    paper_width = 794
+    paper_height = 1123
+
+    paper = QGraphicsRectItem(0, 0, paper_width, paper_height) # A4 at 96 DPI
     paper.setBrush(QBrush(QColor("White")))
     score.addItem(paper)
 
+    top_margin = 100        # Start 100px from the top
+    side_margin = 50        # 50px padding on left and right
+    line_spacing = 10       # 10px between lines (Total staff height = 40px)
+    system_gap = 80         # Distance between the bottom of one staff and top of next
+    number_of_systems = 8   # How many staves you want on the page
+    x1 = side_margin
+    x2 = paper_width - side_margin
+
+    # 3. The Loop
+    current_y = top_margin
+
+    for system_index in range(number_of_systems):
+        # Draw 5 lines for this specific staff
+        for line_index in range(5):
+            # Calculate Y for this specific line
+            y = current_y + (line_index * line_spacing)
+            
+            # Create the line item
+            line = QGraphicsLineItem(x1, y, x2, y)
+            line.setPen(QPen(Qt.GlobalColor.black, 1))
+            
+            # Make the line a child of the paper (so if you move paper, lines move too)
+            line.setParentItem(paper)
+
+        # 4. Advance the 'Cursor' for the next system
+        # Current Y + (Height of Staff) + Gap
+        staff_height = 4 * line_spacing
+        current_y += staff_height + system_gap
+
+
     view = QGraphicsView(score)
-    view.setStyleSheet("background-color: #f5f5f6; border: none;")
+    view.setStyleSheet("background-color: #bbc1cd; border: none;")
     view.setRenderHint(QPainter.Antialiasing)
     view.setDragMode(QGraphicsView.ScrollHandDrag)
     view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
@@ -223,9 +237,34 @@ def get_score():
     view.my_filter_ref = zoom_filter
 
     view.centerOn(paper)
+    return view
 
-    score_layout.addWidget(view)
+def get_score():
+    try:
+        from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+    except:
+        exception_importing("get_score")
+
+    score_tab = QWidget()
+    score_tab.setStyleSheet("background-color: grey;")
     
+    score_layout = QVBoxLayout(score_tab)
+    score_layout.setContentsMargins(0, 0, 0, 0)
+    score_layout.setSpacing(0)
+
+    top_bar = QWidget()
+    top_bar.setStyleSheet("background-color: #d0d0d0;")
+    top_bar_layout = QHBoxLayout(top_bar)
+    top_bar_layout.setContentsMargins(5, 5, 5, 5)
+    for label in ["A", "B", "C"]:
+        btn = QPushButton(label)
+        top_bar_layout.addWidget(btn)
+    top_bar_layout.addStretch()
+    score_layout.addWidget(top_bar)
+
+    graphics = get_graphics()
+    score_layout.addWidget(graphics)
+
     return score_tab
 
 def main():
