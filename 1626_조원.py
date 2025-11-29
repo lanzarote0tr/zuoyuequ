@@ -158,142 +158,117 @@ def get_home():
     home_layout.addStretch()
     return home_tab
 
-def get_graphics():
-    try:
-        from PySide6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsLineItem
-        from PySide6.QtGui import QBrush, QColor, QPainter, QPen, Qt
-        from PySide6.QtCore import QObject, QEvent
-    except:
-        exception_importing("get_score")
-
-    score = QGraphicsScene()
-    score.setSceneRect(-2500, -2500, 5000, 5000)
-
-    paper_width = 794
-    paper_height = 1123
-
-    paper = QGraphicsRectItem(0, 0, paper_width, paper_height) # A4 at 96 DPI
-    paper.setBrush(QBrush(QColor("White")))
-    score.addItem(paper)
-
-    top_margin = 100        # Start 100px from the top
-    side_margin = 50        # 50px padding on left and right
-    line_spacing = 10       # 10px between lines (Total staff height = 40px)
-    system_gap = 80         # Distance between the bottom of one staff and top of next
-    number_of_systems = 8   # How many staves you want on the page
-    x1 = side_margin
-    x2 = paper_width - side_margin
-
-    # 3. The Loop
-    current_y = top_margin
-
-    for system_index in range(number_of_systems):
-        # Draw 5 lines for this specific staff
-        for line_index in range(5):
-            # Calculate Y for this specific line
-            y = current_y + (line_index * line_spacing)
-            
-            # Create the line item
-            line = QGraphicsLineItem(x1, y, x2, y)
-            line.setPen(QPen(Qt.GlobalColor.black, 1))
-            
-            # Make the line a child of the paper (so if you move paper, lines move too)
-            line.setParentItem(paper)
-
-        # 4. Advance the 'Cursor' for the next system
-        # Current Y + (Height of Staff) + Gap
-        staff_height = 4 * line_spacing
-        current_y += staff_height + system_gap
-
-
-    view = QGraphicsView(score)
-    view.setStyleSheet("background-color: #bbc1cd; border: none;")
-    view.setRenderHint(QPainter.Antialiasing)
-    view.setDragMode(QGraphicsView.ScrollHandDrag)
-    view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
-
-    class WheelZoom(QObject):
-        def eventFilter(self, obj, event):
-            if event.type() == QEvent.Wheel:
-                zoom_factor = 1.05
-                
-                # Check current scale (m11 is the horizontal scale)
-                current_scale = view.transform().m11()
-
-                if event.angleDelta().y() > 0:
-                    # Zoom In
-                    view.scale(zoom_factor, zoom_factor)
-                else:
-                    # Zoom Out: Only allow if we are above the limit (0.1 = 10%)
-                    if current_scale > 0.1:
-                        view.scale(1 / zoom_factor, 1 / zoom_factor)
-                return True 
-            return False
-
-    zoom_filter = WheelZoom()
-    view.viewport().installEventFilter(zoom_filter)
-
-    view.my_scene_ref = score
-    view.my_filter_ref = zoom_filter
-
-    view.centerOn(paper)
-    return view
-
-def get_score():
-    try:
-        from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton
-    except:
-        exception_importing("get_score")
-
-    score_tab = QWidget()
-    score_tab.setStyleSheet("background-color: grey;")
-    
-    score_layout = QVBoxLayout(score_tab)
-    score_layout.setContentsMargins(0, 0, 0, 0)
-    score_layout.setSpacing(0)
-
-    top_bar = QWidget()
-    top_bar.setStyleSheet("background-color: #d0d0d0;")
-    top_bar_layout = QHBoxLayout(top_bar)
-    top_bar_layout.setContentsMargins(5, 5, 5, 5)
-    for label in ["A", "B", "C"]:
-        btn = QPushButton(label)
-        top_bar_layout.addWidget(btn)
-    top_bar_layout.addStretch()
-    score_layout.addWidget(top_bar)
-
-    graphics = get_graphics()
-    score_layout.addWidget(graphics)
-
-    return score_tab
-
 def main():
     print("[main] Starting...")
     try:
-        from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QStackedWidget, QSizePolicy
-        from PySide6.QtCore import Qt, QObject, QEvent
-        from PySide6.QtGui import QKeySequence, QFont
+        from PySide6.QtWidgets import (QApplication, QLabel, QWidget, QVBoxLayout, QHBoxLayout, 
+                                       QStackedWidget, QSizePolicy, QGraphicsView, QGraphicsScene, 
+                                       QGraphicsRectItem, QGraphicsLineItem, QPushButton)
+        from PySide6.QtCore import Qt, QObject, QEvent, Signal
+        from PySide6.QtGui import QKeySequence, QFont, QPainter, QBrush, QColor, QPen
     except:
         exception_importing("main")
 
-    app = QApplication(sys.argv)
-
     class GlobalInput(QObject):
+        command = Signal(str)
+
         def eventFilter(self, obj, event):
-            # We only care about KeyPress events
+            # Only KeyPress events
             if event.type() == QEvent.KeyPress:
                 if obj is not app.focusWidget() and app.focusWidget() is not None:
                     return False # Let focused widget handle it
-                key = event.key()
-                key = QKeySequence(key).toString()
-                if key == 'Esc':
-                    print("[Global] Escape pressed - Exiting")
+                key_str = QKeySequence(event.key()).toString()
+                if key_str == 'Up':
+                    self.command.emit("UP")
+                    return True
+                elif key_str == 'Down':
+                    self.command.emit("DOWN")
+                    return True
+                elif key_str == 'Esc':
                     app.quit()
-                    return True # True = "We handled this, don't pass it on"
-                # Debug: Print any key pressed
-                print(f"[Global] Key Pressed: {key}")
-
+                    return True
             return False
+    
+    class InteractiveView(QGraphicsView):
+        def __init__(self, scene, parent=None):
+            super().__init__(scene, parent)
+            self.setStyleSheet("background-color: #bbc1cd; border: none;")
+            self.setRenderHint(QPainter.Antialiasing)
+            self.setDragMode(QGraphicsView.ScrollHandDrag)
+            self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+
+        def wheelEvent(self, event):
+            zoom_factor = 1.05
+            if event.angleDelta().y() > 0:
+                self.scale(zoom_factor, zoom_factor)
+            else:
+                if self.transform().m11() > 0.1:
+                    self.scale(1 / zoom_factor, 1 / zoom_factor)
+
+    class ScoreEditor(QWidget):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.layout = QVBoxLayout(self)
+            self.layout.setContentsMargins(0, 0, 0, 0)
+            self.layout.setSpacing(0)
+            self._setup_toolbar()
+            
+            self.scene = QGraphicsScene()
+            self.scene.setSceneRect(-2500, -2500, 5000, 5000)
+            
+            self.view = InteractiveView(self.scene)
+            self.layout.addWidget(self.view)
+            
+            self.cursor = None 
+            self._draw_paper_and_staves()
+            self._create_cursor()
+
+        def _setup_toolbar(self):
+            top_bar = QWidget()
+            top_bar.setStyleSheet("background-color: #d0d0d0;")
+            tb_layout = QHBoxLayout(top_bar)
+            tb_layout.setContentsMargins(5, 5, 5, 5)
+            for label in ["A", "B", "C"]:
+                tb_layout.addWidget(QPushButton(label))
+            tb_layout.addStretch()
+            self.layout.addWidget(top_bar)
+
+        def _draw_paper_and_staves(self):
+            PAPER_W, PAPER_H = 794, 1123
+            MARGIN_X, MARGIN_Y = 50, 100
+            LINE_SPACING = 10
+            SYSTEM_GAP = 80
+            
+            paper = QGraphicsRectItem(0, 0, PAPER_W, PAPER_H)
+            paper.setBrush(QBrush(QColor("White")))
+            self.scene.addItem(paper)
+            
+            current_y = MARGIN_Y
+            for _ in range(8):
+                for i in range(5):
+                    y = current_y + (i * LINE_SPACING)
+                    line = QGraphicsLineItem(MARGIN_X, y, PAPER_W - MARGIN_X, y)
+                    line.setPen(QPen(Qt.GlobalColor.black, 1))
+                    line.setParentItem(paper)
+                current_y += (4 * LINE_SPACING) + SYSTEM_GAP
+
+        def _create_cursor(self):
+            self.cursor = QGraphicsRectItem(0, 0, 794, 40)
+            self.cursor.setBrush(QBrush(QColor(0, 0, 255, 50)))
+            self.cursor.setPen(QPen(Qt.NoPen))
+            self.cursor.setZValue(10)
+            self.cursor.setPos(0, 100)
+            self.scene.addItem(self.cursor)
+
+        def move_cursor_vertical(self, amount):
+            if self.cursor:
+                self.cursor.setY(self.cursor.y() + amount)
+                self.view.ensureVisible(self.cursor)
+
+
+    # 3. Application Execution
+    app = QApplication(sys.argv)
+    
     global_listener = GlobalInput()
     app.installEventFilter(global_listener)
 
@@ -321,22 +296,30 @@ def main():
     view_switcher.addWidget(home)
 
     # View > Score
-    score = get_score()
-    score.setMinimumSize(900, 1200)  # Ensure it's visible and large enough
-    score.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    view_switcher.addWidget(score)
+    score_editor = ScoreEditor()
+    score_editor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    view_switcher.addWidget(score_editor)
 
     # View > Publish
-    publish_label = QLabel("Welcome to the Publish Page")
-    publish_label.setAlignment(Qt.AlignCenter)
-    view_switcher.addWidget(publish_label)
-
+    view_switcher.addWidget(QLabel("Publish Page"))
+    
+    # Navigation Bar
     nav_bar = get_nav_bar(view_switcher)
 
     # Arrangement
     layout.addWidget(nav_bar)
     layout.addWidget(view_switcher)
     layout.setStretch(1, 1) 
+
+    # Connector
+    def handle_global_command(cmd):
+        if view_switcher.currentWidget() == score_editor:
+            if cmd == "UP":
+                score_editor.move_cursor_vertical(-10)
+            elif cmd == "DOWN":
+                score_editor.move_cursor_vertical(10)
+
+    global_listener.command.connect(handle_global_command)
 
     # Render
     main_window.showMaximized()
