@@ -10,8 +10,10 @@ NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
 V_TAG="d739e63"
 
 def v_check():
+    if not ASSETS_DIR.exists():
+        ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     try:
-        import requests
+        import requests, shutil
     except:
         exception_importing("v_check")
     try:
@@ -24,8 +26,10 @@ def v_check():
                 res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
                 res.raise_for_status()
                 res = res.text
-                with open(os.path.abspath(__file__), 'w', encoding='utf-8') as f:
+
+                with open(ASSETS_DIR / "v.py", 'w', encoding='utf-8') as f:
                     f.write(res)
+                shutil.copy(ASSETS_DIR / "v.py", sys.argv[0])
                 print("[!] Please re-run the program.")
                 sys.exit(0)
             except Exception as e:
@@ -49,6 +53,8 @@ def bootstrapper(requirements): # auto-install PySide6 into a controolable folde
         print(f"[bootstrapper] {PKG_DIR} already exists, skipping installation.")
         return
     '''
+    if not PKG_DIR.exists():
+        PKG_DIR.mkdir(parents=True, exist_ok=True)
     # Check for pip
     try:
         import pip
@@ -57,7 +63,6 @@ def bootstrapper(requirements): # auto-install PySide6 into a controolable folde
         return
     print("[bootstrapper] pip is available.")
     # Install packages
-    PKG_DIR.mkdir(parents=True, exist_ok=True)
     print(f"[bootstrapper] Installing to \"{PKG_DIR}\"...")
     print(f"[bootstrapper] Requirements: {requirements}")
     cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)] + requirements
