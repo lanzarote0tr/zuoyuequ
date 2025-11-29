@@ -10,6 +10,7 @@ NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
 V_TAG = "abcd"
 
 def v_check():
+    global V_TAG
     if not ASSETS_DIR.exists():
         ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     try:
@@ -56,6 +57,7 @@ def v_check():
         sys.exit(1)
 
 def v_cleanup():
+    global V_TAG
     try:
         import shutil
     except:
