@@ -99,38 +99,41 @@ def get_home():
     class ClickableButton(QWidget):
         def __init__(self, icon_path, text, parent=None):
             super().__init__(parent)
+            self.setObjectName("ClickableButton")
+            self.setAttribute(Qt.WA_StyledBackground, True)
             self.setCursor(Qt.PointingHandCursor)
-            self.setStyleSheet("""
-                QWidget {
-                    background-color: #f5f5f6;
-                    border-radius: 5px;
-                    height: 100px;
-                }
-            """)
+            self.setFixedHeight(70)
             self.default_style = """
-                QWidget {
-                    background-color: #f5f5f6;
+                #ClickableButton {
+                    background-color: #e4e9ed;
                     border-radius: 5px;
+                    height: 1000px;
+                }
+                #ClickableButton QLabel {
+                    background-color: transparent;
                 }
             """
             self.hover_style = """
-                QWidget {
+                #ClickableButton {
                     background-color: #e2e5e9;
                     border-radius: 5px;
+                }
+                #ClickableButton QLabel {
+                    background-color: transparent;
                 }
             """
             layout = QHBoxLayout(self)
             layout.setContentsMargins(24, 0, 0, 0)
             layout.setSpacing(16)
             icon_label = QLabel()
-            icon_pix = QIcon(str(icon_path)).pixmap(QSize(32, 32))
+            icon_pix = QIcon(str(icon_path)).pixmap(QSize(32, 50))
             icon_label.setPixmap(icon_pix)
             text_label = QLabel(text)
             text_label.setStyleSheet("font-size: 20px;")
-            
             layout.addWidget(icon_label)
             layout.addWidget(text_label)
             layout.addStretch()
+            self.setStyleSheet(self.default_style)
 
         def enterEvent(self, event):
             self.setStyleSheet(self.hover_style)
@@ -139,7 +142,6 @@ def get_home():
             self.setStyleSheet(self.default_style)
 
         def mousePressEvent(self, event: QMouseEvent):
-            # TODO: Add your button click logic here
             print("New Score button clicked!")
 
     home_tab = QWidget()
@@ -231,7 +233,7 @@ def main():
     try:
         from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QStackedWidget, QSizePolicy
         from PySide6.QtCore import Qt, QObject, QEvent
-        from PySide6.QtGui import QKeySequence
+        from PySide6.QtGui import QKeySequence, QFont
     except:
         exception_importing("main")
 
@@ -255,6 +257,12 @@ def main():
             return False
     global_listener = GlobalInput()
     app.installEventFilter(global_listener)
+
+    app.setStyleSheet("""
+        QWidget {
+            font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+        }
+    """)
 
     # Main window
     main_window = QWidget()
