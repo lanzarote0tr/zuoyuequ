@@ -87,21 +87,63 @@ def get_nav_bar(view_switcher):
     button_group.idClicked.connect(view_switcher.setCurrentIndex)
     return nav_bar
 
+def get_home():
+    try:
+        from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QStyle
+        from PySide6.QtCore import Qt
+    except:
+        exception_importing("get_home")
+    home_tab = QWidget()
+
+    # VSTACK
+    home_layout = QVBoxLayout(home_tab)
+    home_layout.setContentsMargins(50, 100, 50, 0)
+
+    # Scores Label
+    scores_label = QLabel("Scores")
+    scores_label.setStyleSheet("font-size: 24px; font-weight: bold;")
+    home_layout.addWidget(scores_label)
+
+    # New Score Button
+    new_score_button = QPushButton("New Score")
+    new_score_button.setIcon(home_tab.style().standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton))
+    # new_score_button.setFixedSize(120, 40)
+    new_score_button.setStyleSheet("""
+        QPushButton {
+            height: 40px;
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        QPushButton:hover {
+            background-color: #2ecc71;
+        }
+        QPushButton:pressed {
+            background-color: #219150;
+        }
+    """)
+    home_layout.addWidget(new_score_button)
+
+    home_layout.addStretch() # Push content to the top
+    return home_tab
+
 def get_score():
     try:
         from PySide6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QVBoxLayout, QHBoxLayout, QPushButton, QGraphicsRectItem
         from PySide6.QtGui import QBrush, QColor, QPainter
         from PySide6.QtCore import Qt, QObject, QEvent
     except:
-        print("Error importing PySide6 modules.")
-        return None
+        exception_importing("get_score")
 
     score_tab = QWidget()
     score_tab.setStyleSheet("background-color: grey;")
     
-    layout = QVBoxLayout(score_tab)
-    layout.setContentsMargins(0, 0, 0, 0)
-    layout.setSpacing(0)
+    score_layout = QVBoxLayout(score_tab)
+    score_layout.setContentsMargins(0, 0, 0, 0)
+    score_layout.setSpacing(0)
 
     top_bar = QWidget()
     top_bar.setStyleSheet("background-color: #d0d0d0;")
@@ -111,20 +153,17 @@ def get_score():
         btn = QPushButton(label)
         top_bar_layout.addWidget(btn)
     top_bar_layout.addStretch()
-    layout.addWidget(top_bar)
+    score_layout.addWidget(top_bar)
 
     score = QGraphicsScene()
-    
     score.setSceneRect(-2500, -2500, 5000, 5000)
 
-    blue_box = QGraphicsRectItem(0, 0, 100, 100)
-    blue_box.setBrush(QBrush(QColor("blue")))
-    
-    score.addItem(blue_box)
+    paper = QGraphicsRectItem(0, 0, 794, 1123) # A4 at 96 DPI
+    paper.setBrush(QBrush(QColor("White")))
+    score.addItem(paper)
 
     view = QGraphicsView(score)
-    view.setStyleSheet("background-color: white; border: none;")
-    
+    view.setStyleSheet("background-color: #f5f5f6; border: none;")
     view.setRenderHint(QPainter.Antialiasing)
     view.setDragMode(QGraphicsView.ScrollHandDrag)
     view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
@@ -132,11 +171,18 @@ def get_score():
     class WheelZoom(QObject):
         def eventFilter(self, obj, event):
             if event.type() == QEvent.Wheel:
-                zoom_factor = 1.15
+                zoom_factor = 1.05
+                
+                # Check current scale (m11 is the horizontal scale)
+                current_scale = view.transform().m11()
+
                 if event.angleDelta().y() > 0:
+                    # Zoom In
                     view.scale(zoom_factor, zoom_factor)
                 else:
-                    view.scale(1 / zoom_factor, 1 / zoom_factor)
+                    # Zoom Out: Only allow if we are above the limit (0.1 = 10%)
+                    if current_scale > 0.1:
+                        view.scale(1 / zoom_factor, 1 / zoom_factor)
                 return True 
             return False
 
@@ -146,9 +192,9 @@ def get_score():
     view.my_scene_ref = score
     view.my_filter_ref = zoom_filter
 
-    view.centerOn(blue_box)
+    view.centerOn(paper)
 
-    layout.addWidget(view)
+    score_layout.addWidget(view)
     
     return score_tab
 
@@ -156,15 +202,36 @@ def main():
     print("[main] Starting...")
     try:
         from PySide6.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout, QStackedWidget, QSizePolicy
-        from PySide6.QtCore import Qt
+        from PySide6.QtCore import Qt, QObject, QEvent
+        from PySide6.QtGui import QKeySequence
     except:
         exception_importing("main")
 
     app = QApplication(sys.argv)
 
+    class GlobalInput(QObject):
+        def eventFilter(self, obj, event):
+            # We only care about KeyPress events
+            if event.type() == QEvent.KeyPress:
+                if obj is not app.focusWidget() and app.focusWidget() is not None:
+                    return False # Let focused widget handle it
+                key = event.key()
+                key = QKeySequence(key).toString()
+                if key == 'Esc':
+                    print("[Global] Escape pressed - Exiting")
+                    app.quit()
+                    return True # True = "We handled this, don't pass it on"
+                # Debug: Print any key pressed
+                print(f"[Global] Key Pressed: {key}")
+
+            return False
+    global_listener = GlobalInput()
+    app.installEventFilter(global_listener)
+
     # Main window
     main_window = QWidget()
     main_window.setWindowTitle("Zuoyuequ")
+    main_window.setStyleSheet("background-color: #f5f5f6;")
 
     # VSTACK
     layout = QVBoxLayout(main_window)
@@ -175,9 +242,8 @@ def main():
     view_switcher = QStackedWidget()
 
     # View > Home
-    home_label = QLabel("Welcome to the Home Page")
-    home_label.setAlignment(Qt.AlignCenter)
-    view_switcher.addWidget(home_label)
+    home = get_home()
+    view_switcher.addWidget(home)
 
     # View > Score
     score = get_score()
