@@ -7,7 +7,7 @@ from pathlib import Path
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
 ASSETS_DIR = Path(__file__).resolve().parent / "_1626_assets"
 NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
-V_TAG="abcdef"
+V_TAG="d739e63"
 
 def v_check():
     try:
@@ -15,13 +15,13 @@ def v_check():
     except:
         exception_importing("v_check")
     try:
-        res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt", timeout=5)
+        res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/v.txt", timeout=5)
         res.raise_for_status()
         res = res.text
         if res and res != V_TAG:
             print("[v_check] v_tag reload...")
             try:
-                res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
+                res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
                 res.raise_for_status()
                 res = res.text
                 with open(os.path.abspath(__file__), 'w', encoding='utf-8') as f:
