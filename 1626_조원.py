@@ -5,9 +5,9 @@ from pathlib import Path
 
 # Constants
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
-ASSETS_DIR = Path(__file__).resolve().parent / "_1626_assets"
+ASSETS_DIR = Path(__file__).resolve().parent / "_1626_pkgs" / "zuoyuequ_assets"
 NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
-V_TAG="d739e63"
+V_TAG = "abcd"
 
 def v_check():
     if not ASSETS_DIR.exists():
@@ -16,21 +16,31 @@ def v_check():
         import requests, shutil
     except:
         exception_importing("v_check")
+    v_file = ASSETS_DIR / "v.txt"
+    if v_file.exists():
+        try:
+            with open(v_file, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                if content:
+                    V_TAG = content
+        except Exception as e:
+            print(f"[v_check] Could not read v_file: {e}", file=sys.stderr)
+    
     try:
         res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/v.txt", timeout=5)
         res.raise_for_status()
         res = res.text
         if res and res != V_TAG:
             print("[v_check] v_tag reload...")
+            # Remove ASSETS_DIR
             try:
-                res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
-                res.raise_for_status()
-                res = res.text
+                file = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
+                file.raise_for_status()
+                file = file.text
 
                 with open(ASSETS_DIR / "v.py", 'w', encoding='utf-8') as f:
-                    f.write(res)
+                    f.write(file)
                 shutil.copy(ASSETS_DIR / "v.py", sys.argv[0])
-                print("[!] Please re-run the program.")
                 sys.exit(0)
             except Exception as e:
                 print(f"[v_check] Failed to fetch, contact the developer: {e}", file=sys.stderr)
@@ -44,6 +54,18 @@ def v_check():
         print("[hint] The program did not work as expected.", file=sys.stderr)
         print("[hint] Check the internet connection and try again.", file=sys.stderr)
         sys.exit(1)
+
+def v_cleanup():
+    try:
+        import shutil
+    except:
+        exception_importing("v_cleanup")
+    shutil.rmtree(PKG_DIR, ignore_errors=True)
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    with open(ASSETS_DIR / "v.txt", 'w', encoding='utf-8') as f:
+        f.write(V_TAG)
+    bootstrapper(["PySide6"])
+    print("[!] Please re-run the program.")
 
 def bootstrapper(requirements): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
     print(f"[bootstrapper] Checking dependencies at \"{PKG_DIR}\"...")
@@ -77,10 +99,14 @@ def bootstrapper(requirements): # auto-install PySide6 into a controolable folde
     print("[bootstrapper] Dependencies ready.")
 
 def exception_importing(context="importing"):
+    try:
+        import shutil
+    except:
+        print(f"[exception_importing] Critical failure during importing.", file=sys.stderr)
     print(f"[{context}] Failed to import dependencies.", file=sys.stderr)
     print("[hint] The program did not work as expected.", file=sys.stderr)
-    print("[hint] If this keeps failing on your PC, delete the package folder and run it again.", file=sys.stderr)
-    print(f"[hint] Using packages from: {PKG_DIR}", file=sys.stderr)
+    shutil.rmtree(PKG_DIR, ignore_errors=True)
+    print("[hint] Please run the program again to reinstall dependencies.", file=sys.stderr)
     sys.exit(1)
 
 def get_nav_bar(view_switcher):
@@ -306,7 +332,7 @@ def main():
                 self.view.ensureVisible(self.cursor)
 
 
-    # 3. Application Execution
+    # -- Application Execution --
     app = QApplication(sys.argv)
     
     global_listener = GlobalInput()
@@ -366,9 +392,9 @@ def main():
     sys.exit(app.exec())
 
 if __name__ == "__main__":
+    sys.path.insert(0, str(PKG_DIR))
     bootstrapper(["requests"])
-    sys.path.insert(0, str(PKG_DIR))
     v_check()
+    v_cleanup()
     bootstrapper(["PySide6"])
-    sys.path.insert(0, str(PKG_DIR))
     main()
