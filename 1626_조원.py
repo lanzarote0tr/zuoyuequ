@@ -127,6 +127,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
         except subprocess.CalledProcessError as e:
             print(f"\n[bootstrapper] pip failed. ({e.returncode})", file=sys.stderr)
             sys.exit(e.returncode)
+        sys.path.insert(0, str(PKG_DIR))
         print("[bootstrapper] Dependencies ready.")
 
 
