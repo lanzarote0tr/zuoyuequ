@@ -119,6 +119,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
                 print(f"[bootstrapper] Failed to clear old packages: {e}", file=sys.stderr)
                 print(f"[tip] Check instance already running or file permissions.", file=sys.stderr)
                 sys.exit(1)
+        ASSETS_DIR.mkdir(parents=True, exist_ok=True)
         with open(ASSETS_DIR / "v.txt", 'w', encoding='utf-8') as f:
             f.write(remote_v)
         with open(ASSETS_DIR / "req.txt", 'w', encoding='utf-8') as f:
