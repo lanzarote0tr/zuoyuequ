@@ -7,80 +7,28 @@ from pathlib import Path
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
 ASSETS_DIR = Path(__file__).resolve().parent / "_1626_pkgs" / "zuoyuequ_assets"
 NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
-V_TAG = "abcd"
 
-def v_check():
-    global V_TAG
-    if not ASSETS_DIR.exists():
-        ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-    try:
-        import requests, shutil
-    except:
-        exception_importing("v_check")
-    v_file = ASSETS_DIR / "v.txt"
-    if v_file.exists():
-        try:
-            with open(v_file, 'r', encoding='utf-8') as f:
-                content = f.read().strip()
-                if content:
-                    V_TAG = content
-        except Exception as e:
-            print(f"[v_check] Could not read v_file: {e}", file=sys.stderr)
-    
-    try:
-        res = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt", timeout=5)
-        res.raise_for_status()
-        res = res.text
-        if res and res != V_TAG:
-            V_TAG = res
-            print("[v_check] v_tag reload...")
-            try:
-                file = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/refs/heads/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
-                file.raise_for_status()
-                file = file.text
-
-                with open(ASSETS_DIR / "v.py", 'w', encoding='utf-8') as f:
-                    f.write(file)
-                shutil.copy(ASSETS_DIR / "v.py", sys.argv[0])
-                shutil.rmtree(PKG_DIR, ignore_errors=True)
-                ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-                with open(ASSETS_DIR / "v.txt", 'w', encoding='utf-8') as f:
-                    f.write(V_TAG)
-                bootstrapper(["PySide6"])
-                print("[!] Please re-run the program.")
-                sys.exit(0)
-            except Exception as e:
-                print(f"[v_check] Failed to fetch, contact the developer: {e}", file=sys.stderr)
-                print("[hint] The program did not work as expected.", file=sys.stderr)
-                print("[hint] Check the internet connection and try again.", file=sys.stderr)
-                sys.exit(1)
-        else:
-            return
-    except requests.RequestException as e:
-        print(f"[v_check] Failed to check v_tag, contact the developer: {e}", file=sys.stderr)
-        print("[hint] The program did not work as expected.", file=sys.stderr)
-        print("[hint] Check the internet connection and try again.", file=sys.stderr)
-        sys.exit(1)
+def exception_importing(context="importing"):
+    import shutil
+    print(f"[{context}] Failed to import dependencies.", file=sys.stderr)
+    print("[hint] The program did not work as expected.", file=sys.stderr)
+    shutil.rmtree(PKG_DIR, ignore_errors=True)
+    print("[hint] Please run the program again to reinstall dependencies.", file=sys.stderr)
+    sys.exit(1)
 
 def bootstrapper(requirements): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
-    # Check if already installed
-    '''
-    if PKG_DIR.exists(): # TODO: Check specific packages?
-        print(f"[bootstrapper] {PKG_DIR} already exists, skipping installation.")
-        return
-    '''
-    if not PKG_DIR.exists():
-        PKG_DIR.mkdir(parents=True, exist_ok=True)
-    # Check for pip
+    import shutil
+    os.remove("1626_temp.py") if Path("1626_temp.py").exists() else None
+    # mandatory check
     try:
         import pip
     except:
         print("[bootstrapper] pip is not installed, install pip and try again.", file=sys.stderr)
-        return
+        sys.exit(1)
     print("[bootstrapper] pip is available.")
-    # Install packages
-    print(f"[bootstrapper] Installing to \"{PKG_DIR}\"...")
-    print(f"[bootstrapper] Requirements: {requirements}")
+
+    # install requests module regradless of the installation status
+    print(f"[bootstrapper] Installing requests to \"{PKG_DIR}\"...")
     cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)] + requirements
     try:
         # Prevent conflicts with packages from the main Python environment.
@@ -90,18 +38,103 @@ def bootstrapper(requirements): # auto-install PySide6 into a controolable folde
     except subprocess.CalledProcessError as e:
         print(f"\n[bootstrapper] pip failed. ({e.returncode})", file=sys.stderr)
         sys.exit(e.returncode)
-    print("[bootstrapper] Dependencies ready.")
+    sys.path.insert(0, str(PKG_DIR))
+    print("[bootstrapper] Requests ready.")
 
-def exception_importing(context="importing"):
+    # Fetch v.txt and req.txt
+    remote_v = ""
+    remote_req = []
     try:
-        import shutil
+        import requests
     except:
-        print(f"[exception_importing] Critical failure during importing.", file=sys.stderr)
-    print(f"[{context}] Failed to import dependencies.", file=sys.stderr)
-    print("[hint] The program did not work as expected.", file=sys.stderr)
-    shutil.rmtree(PKG_DIR, ignore_errors=True)
-    print("[hint] Please run the program again to reinstall dependencies.", file=sys.stderr)
-    sys.exit(1)
+        exception_importing("bootstrapper")
+    try:
+        remote_v = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt", timeout=5).text.strip()
+        remote_req = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/req.txt", timeout=5).text.strip().splitlines()
+    except requests.RequestException as e:
+        print(f"[bootstrapper] Failed to fetch: {e}", file=sys.stderr)
+        print("[hint] The program did not work as expected.", file=sys.stderr)
+        print("[hint] Check the internet connection and try again.", file=sys.stderr)
+        sys.exit(1)
+
+    # If ASSETS_DIR does not exist, skip reading v.txt and req.txt
+    local_v = ""
+    local_req = []
+    if ASSETS_DIR.exists():
+        # Read v.txt and req.txt
+        local_v = ASSETS_DIR / "v.txt"
+        try:
+            if local_v.exists():
+                with open(local_v, 'r', encoding='utf-8') as f:
+                    local_v = f.read().strip()
+            else:
+                local_v = ""
+            local_req = ASSETS_DIR / "req.txt"
+            if local_req.exists():
+                with open(local_req, 'r', encoding='utf-8') as f:
+                    local_req = f.read().strip().splitlines()
+            else:
+                local_req = []
+        except Exception as e:
+            print(f"[bootstrapper] Failed to read local files: {e}", file=sys.stderr)
+            print(f"[tip] Check instance already running or file permissions.", file=sys.stderr)
+            sys.exit(1)
+    
+    # v diff > replace
+    if remote_v != local_v:
+        print("[bootstrapper] v.txt mismatch!")
+        # Fetch v.py
+        file = None
+        try:
+            file = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
+            file.raise_for_status()
+            file = file.text
+        except Exception as e:
+            print(f"[bootstrapper] Failed to fetch: {e}", file=sys.stderr)
+            print("[hint] The program did not work as expected.", file=sys.stderr)
+            print("[hint] Check the internet connection and try again.", file=sys.stderr)
+            sys.exit(1)
+        try:
+            if not ASSETS_DIR.exists():
+                ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+            with open(ASSETS_DIR / "v.txt", 'w', encoding='utf-8') as f:
+                f.write(remote_v)
+            os.rename(Path(sys.argv[0]), "1626_temp.py")
+            with open(Path(sys.argv[0]), 'w', encoding='utf-8') as f:
+                f.write(file)
+        except Exception as e:
+            print(f"[bootstrapper] Failed to write files: {e}", file=sys.stderr)
+            print(f"[tip] Check instance already running or file permissions.", file=sys.stderr)
+            sys.exit(1)
+        print("[!] Please re-run the program.")
+        sys.exit(0)
+    
+    # req diff > reinstall
+    if sorted(remote_req) != sorted(local_req):
+        print("[bootstrapper] req.txt mismatch!")
+        if PKG_DIR.exists():
+            try:
+                shutil.rmtree(PKG_DIR, ignore_errors=True)
+            except Exception as e:
+                print(f"[bootstrapper] Failed to clear old packages: {e}", file=sys.stderr)
+                print(f"[tip] Check instance already running or file permissions.", file=sys.stderr)
+                sys.exit(1)
+        with open(ASSETS_DIR / "v.txt", 'w', encoding='utf-8') as f:
+            f.write(remote_v)
+        with open(ASSETS_DIR / "req.txt", 'w', encoding='utf-8') as f:
+            f.write('\n'.join(remote_req))
+        print(f"[bootstrapper] Installing to \"{PKG_DIR}\"...")
+        cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)] + remote_req
+        try:
+            # Prevent conflicts with packages from the main Python environment.
+            install_env = os.environ.copy()
+            install_env["PYTHONNOUSERSITE"] = "1"
+            subprocess.run(cmd, check=True, env=install_env)
+        except subprocess.CalledProcessError as e:
+            print(f"\n[bootstrapper] pip failed. ({e.returncode})", file=sys.stderr)
+            sys.exit(e.returncode)
+        print("[bootstrapper] Dependencies ready.")
+
 
 def get_nav_bar(view_switcher):
     try:
@@ -386,8 +419,5 @@ def main():
     sys.exit(app.exec())
 
 if __name__ == "__main__":
-    sys.path.insert(0, str(PKG_DIR))
-    bootstrapper(["requests"])
-    v_check()
-    bootstrapper(["PySide6"])
+    bootstrapper()
     main()
