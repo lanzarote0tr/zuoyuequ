@@ -29,7 +29,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
 
     # install requests module regradless of the installation status
     print(f"[bootstrapper] Installing requests to \"{PKG_DIR}\"...")
-    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR)] + requirements
+    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR), "requests"]
     try:
         # Prevent conflicts with packages from the main Python environment.
         install_env = os.environ.copy()
