@@ -252,7 +252,8 @@ def main():
                                        QGraphicsRectItem, QGraphicsLineItem, QPushButton)
         from PySide6.QtCore import Qt, QObject, QEvent, Signal
         from PySide6.QtGui import QKeySequence, QFont, QPainter, QBrush, QColor, QPen
-    except:
+    except Exception as e:
+        print(e)
         exception_importing("main")
 
     class GlobalInput(QObject):
