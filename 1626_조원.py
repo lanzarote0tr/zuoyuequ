@@ -16,7 +16,7 @@ def exception_importing(context="importing"):
     print("[hint] Please run the program again to reinstall dependencies.", file=sys.stderr)
     sys.exit(1)
 
-def bootstrapper(requirements): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
+def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 'it doesn’t work on my PC'
     import shutil
     os.remove("1626_temp.py") if Path("1626_temp.py").exists() else None
     # mandatory check
