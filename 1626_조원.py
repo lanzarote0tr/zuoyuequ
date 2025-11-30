@@ -8,6 +8,19 @@ PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
 ASSETS_DIR = Path(__file__).resolve().parent / "_1626_pkgs" / "zuoyuequ_assets"
 NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
 
+def fetch_with_curl(url):
+    try:
+        result = subprocess.run(
+            ["curl", "-sL", "--max-time", "5", url],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"curl failed: {e.stderr.strip()}")
+
 def exception_importing(context="importing"):
     import shutil
     print(f"[{context}] Failed to import dependencies.", file=sys.stderr)
@@ -27,31 +40,13 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
         sys.exit(1)
     print("[bootstrapper] pip is available.")
 
-    # install requests module regradless of the installation status
-    print(f"[bootstrapper] Installing requests to \"{PKG_DIR}\"...")
-    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "--target", str(PKG_DIR), "requests"]
-    try:
-        # Prevent conflicts with packages from the main Python environment.
-        install_env = os.environ.copy()
-        install_env["PYTHONNOUSERSITE"] = "1"
-        subprocess.run(cmd, check=True, env=install_env)
-    except subprocess.CalledProcessError as e:
-        print(f"\n[bootstrapper] pip failed. ({e.returncode})", file=sys.stderr)
-        sys.exit(e.returncode)
-    sys.path.insert(0, str(PKG_DIR))
-    print("[bootstrapper] Requests ready.")
-
     # Fetch v.txt and req.txt
     remote_v = ""
     remote_req = []
     try:
-        import requests
-    except:
-        exception_importing("bootstrapper")
-    try:
-        remote_v = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt", timeout=5).text.strip()
-        remote_req = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/req.txt", timeout=5).text.strip().splitlines()
-    except requests.RequestException as e:
+        remote_v = fetch_with_curl("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt").strip()
+        remote_req = fetch_with_curl("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/req.txt").strip().splitlines()
+    except Exception as e:
         print(f"[bootstrapper] Failed to fetch: {e}", file=sys.stderr)
         print("[hint] The program did not work as expected.", file=sys.stderr)
         print("[hint] Check the internet connection and try again.", file=sys.stderr)
@@ -86,9 +81,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
         # Fetch v.py
         file = None
         try:
-            file = requests.get("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/1626_%EC%A1%B0%EC%9B%90.py", timeout=5)
-            file.raise_for_status()
-            file = file.text
+            file = fetch_with_curl("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/1626_%EC%A1%B0%EC%9B%90.py")
         except Exception as e:
             print(f"[bootstrapper] Failed to fetch: {e}", file=sys.stderr)
             print("[hint] The program did not work as expected.", file=sys.stderr)
