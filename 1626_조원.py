@@ -133,7 +133,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
             try:
                 content = fetch_with_curl(f"https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/assets/{asset}")
                 print(content)
-                with open(ASSETS_DIR / asset, 'w', encoding='utf-8') as f:
+                with open(ASSETS_DIR / asset, 'wb') as f:
                     f.write(content)
             except Exception as e:
                 print(f"[bootstrapper] Failed to fetch asset {asset}: {e}", file=sys.stderr)
