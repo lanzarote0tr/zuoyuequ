@@ -132,6 +132,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
         for asset in assets:
             try:
                 content = fetch_with_curl(f"https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/assets/{asset}")
+                print(content)
                 with open(ASSETS_DIR / asset, 'w', encoding='utf-8') as f:
                     f.write(content)
             except Exception as e:
