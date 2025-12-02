@@ -6,7 +6,6 @@ from pathlib import Path
 # Constants
 PKG_DIR = Path(__file__).resolve().parent / "_1626_pkgs"
 ASSETS_DIR = Path(__file__).resolve().parent / "_1626_pkgs" / "zuoyuequ_assets"
-NEW_SCORE_ICON = ASSETS_DIR / "new_score.svg" # TODO: Fetch from resources
 
 def fetch_with_curl(url):
     try:
@@ -128,6 +127,19 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
             print(f"\n[bootstrapper] pip failed. ({e.returncode})", file=sys.stderr)
             sys.exit(e.returncode)
         print("[bootstrapper] Dependencies ready.")
+        print("[bootstrapper] Fetching assets...")
+        assets = ["new_score.svg"]
+        for asset in assets:
+            try:
+                content = fetch_with_curl(f"https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/assets/{asset}")
+                with open(ASSETS_DIR / asset, 'w', encoding='utf-8') as f:
+                    f.write(content)
+            except Exception as e:
+                print(f"[bootstrapper] Failed to fetch asset {asset}: {e}", file=sys.stderr)
+                print("[hint] The program did not work as expected.", file=sys.stderr)
+                print("[hint] Check the internet connection and try again.", file=sys.stderr)
+                sys.exit(1)
+        print("[bootstrapper] Assets ready.")
 
 
 def get_nav_bar(view_switcher):
@@ -238,7 +250,7 @@ def get_home():
 
         def mousePressEvent(self, event: QMouseEvent):
             print("New Score button clicked!")
-    new_score_button = ClickableButton(NEW_SCORE_ICON, "New Score")
+    new_score_button = ClickableButton(ASSETS_DIR / "new_score.svg", "New Score")
     home_layout.addWidget(new_score_button)
 
     home_layout.addStretch()
