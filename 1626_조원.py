@@ -127,20 +127,22 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
             print(f"\n[bootstrapper] pip failed. ({e.returncode})", file=sys.stderr)
             sys.exit(e.returncode)
         print("[bootstrapper] Dependencies ready.")
-        print("[bootstrapper] Fetching assets...")
-        assets = ["new_score.svg"]
-        for asset in assets:
-            try:
-                content = fetch_with_curl(f"https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/assets/{asset}")
-                print(content)
-                with open(ASSETS_DIR / asset, 'wb') as f:
-                    f.write(content)
-            except Exception as e:
-                print(f"[bootstrapper] Failed to fetch asset {asset}: {e}", file=sys.stderr)
-                print("[hint] The program did not work as expected.", file=sys.stderr)
-                print("[hint] Check the internet connection and try again.", file=sys.stderr)
-                sys.exit(1)
-        print("[bootstrapper] Assets ready.")
+
+def asset_fetch():
+    print("[bootstrapper] Fetching assets...")
+    assets = ["new_score.svg"]
+    for asset in assets:
+        try:
+            content = fetch_with_curl(f"https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/assets/{asset}")
+            print(content)
+            with open(ASSETS_DIR / asset, 'w') as f:
+                f.write(content)
+        except Exception as e:
+            print(f"[bootstrapper] Failed to fetch asset {asset}: {e}", file=sys.stderr)
+            print("[hint] The program did not work as expected.", file=sys.stderr)
+            print("[hint] Check the internet connection and try again.", file=sys.stderr)
+            sys.exit(1)
+    print("[bootstrapper] Assets ready.")
 
 
 def get_nav_bar(view_switcher):
@@ -428,5 +430,6 @@ def main():
 
 if __name__ == "__main__":
     bootstrapper()
+    asset_fetch()
     sys.path.insert(0, str(PKG_DIR))
     main()

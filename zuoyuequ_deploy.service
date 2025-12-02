@@ -1,0 +1,24 @@
+# Place this file in /etc/systemd/system/zuoyuequ.service
+# Then run: sudo systemctl enable --now auto-deploy
+
+[Unit]
+Description=Automated Git Pull and Docker Deploy
+# FIX: Use the Snap service name found in your logs
+After=network-online.target snap.docker.dockerd.service
+Requires=snap.docker.dockerd.service
+
+[Service]
+Type=simple
+User=root
+
+# CRITICAL: Snap binaries (like docker) are in /snap/bin, which systemd doesn't check by default
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+
+# CHANGE THIS PATH to where you put your script
+ExecStart=/bin/bash /home/lanzarote/zuoyuequ/auto_deploy.sh
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
