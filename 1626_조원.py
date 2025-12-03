@@ -342,7 +342,7 @@ def main():
             self._draw_paper_and_staves()
             self._create_cursor()
 
-            self.add_note(100, 50, stem="up")
+            self.add_note(100, 70, stem="up")
 
         def _setup_toolbar(self):
             top_bar = QWidget()
