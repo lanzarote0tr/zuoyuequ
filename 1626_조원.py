@@ -130,7 +130,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
 
 def asset_fetch():
     print("[bootstrapper] Fetching assets...")
-    assets = ["new_score.svg"]
+    assets = ["new_score.svg", "quarter_note_up.svg", "quarter_note_down.svg"]
     for asset in assets:
         try:
             content = fetch_with_curl(f"https://zuoyuequ.trillion-won.com/assets/{asset}")
