@@ -133,7 +133,7 @@ def asset_fetch():
     assets = ["new_score.svg"]
     for asset in assets:
         try:
-            content = fetch_with_curl(f"https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/assets/{asset}")
+            content = fetch_with_curl(f"https://zuoyuequ.trillion-won.com/assets/{asset}")
             print(content)
             with open(ASSETS_DIR / asset, 'w') as f:
                 f.write(content)
