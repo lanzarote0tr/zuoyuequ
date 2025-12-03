@@ -344,8 +344,8 @@ def main():
             self._draw_paper_and_staves()
             self._create_cursor()
             self.render_treble()
-            self.add_note(100, 83, stem="down")
-            self.add_note(150, 88, stem="down")
+            self.add_note(100, 80, stem="down")
+            self.add_note(150, 85, stem="down")
             # self.add_note(0, 91, stem="down")
 
         def _setup_toolbar(self):
