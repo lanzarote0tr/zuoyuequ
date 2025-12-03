@@ -252,7 +252,18 @@ def get_home():
             self.setStyleSheet(self.default_style)
 
         def mousePressEvent(self, event: QMouseEvent):
-            print("New Score button clicked!")
+            if event.button() == Qt.LeftButton:
+                print("New Score button clicked! Switching view...")
+                
+                # 1. Switch the StackedWidget to Index 1 (Score View)
+                view_switcher.setCurrentIndex(1)
+                
+                # 2. Update the Nav Bar visuals so "Score" is selected
+                # We access the 'button_group' attribute we added to nav_bar
+                if hasattr(nav_bar, 'button_group'):
+                    nav_bar.button_group.button(1).setChecked(True)
+            
+            event.accept()
     new_score_button = ClickableButton(ASSETS_DIR / "new_score.svg", "New Score")
     home_layout.addWidget(new_score_button)
 
@@ -322,9 +333,10 @@ def main():
             self.layout.addWidget(self.view)
             
             self.cursor = None 
+            self.paper = None
+            
             self._draw_paper_and_staves()
             self._create_cursor()
-
 
         def _setup_toolbar(self):
             top_bar = QWidget()
@@ -342,17 +354,19 @@ def main():
             LINE_SPACING = 10
             SYSTEM_GAP = 80
             
-            paper = QGraphicsRectItem(0, 0, PAPER_W, PAPER_H)
-            paper.setBrush(QBrush(QColor("White")))
-            self.scene.addItem(paper)
+            self.paper = QGraphicsRectItem(0, 0, PAPER_W, PAPER_H)
+            self.paper.setBrush(QBrush(QColor("White")))
+            self.scene.addItem(self.paper)
             
+            self.view.centerOn(self.paper)
+
             current_y = MARGIN_Y
             for _ in range(8):
                 for i in range(5):
                     y = current_y + (i * LINE_SPACING)
                     line = QGraphicsLineItem(MARGIN_X, y, PAPER_W - MARGIN_X, y)
                     line.setPen(QPen(Qt.GlobalColor.black, 1))
-                    line.setParentItem(paper)
+                    line.setParentItem(self.paper)
                 current_y += (4 * LINE_SPACING) + SYSTEM_GAP
 
         def _create_cursor(self):
