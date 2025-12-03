@@ -390,7 +390,7 @@ def main():
                 note_item.setSharedRenderer(self.renderer_up)
             
             # Scale adjustment (SVGs are 100x120, stave space is ~10px)
-            note_item.setScale(0.3)
+            note_item.setScale(0.4)
             note_item.setPos(x, y)
             note_item.setParentItem(self.paper)
             note_item.setZValue(5)
