@@ -412,6 +412,11 @@ def main():
             self.cursor.setZValue(6)
             self.scene.addItem(self.cursor)
 
+        def move_cursor_horizontal(self, amount):
+            if self.cursor:
+                self.cursor.setX(self.cursor.x() + amount)
+                self.view.ensureVisible(self.cursor)
+
         def move_cursor_vertical(self, amount):
             if self.cursor:
                 self.cursor.setY(self.cursor.y() + amount)
@@ -465,6 +470,7 @@ def main():
 
     # Connector
     def handle_global_command(cmd):
+        print("handle_global_command:", repr(cmd))
         if view_switcher.currentWidget() == score_editor:
             if cmd == "UP":
                 score_editor.move_cursor_vertical(-10)
