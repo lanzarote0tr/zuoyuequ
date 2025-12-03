@@ -471,6 +471,7 @@ def main():
             elif cmd == "DOWN":
                 score_editor.move_cursor_vertical(10)
             elif cmd == "ENTER":
+                print("asdf")
                 score_editor.add_note(score_editor.cursor.x(), score_editor.cursor.y(), stem="down")
                 score_editor.move_cursor_horizontal(10)
 
