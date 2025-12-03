@@ -336,18 +336,13 @@ def main():
             self.cursor = None 
             self.paper = None
             
-            # --- LOAD SVGS FROM FILE SYSTEM ---
-            # Assumes files exist at ASSETS_DIR
             self.renderer_up = QSvgRenderer(str(ASSETS_DIR / "quarter_note_up.svg"))
             self.renderer_down = QSvgRenderer(str(ASSETS_DIR / "quarter_note_down.svg"))
 
             self._draw_paper_and_staves()
             self._create_cursor()
 
-            # --- ADD DEMO NOTES ---
-            self.add_note(x=150, y=92, stem="up") 
-            self.add_note(x=200, y=82, stem="up")
-            self.add_note(x=250, y=140, stem="down")
+            self.add_note(100, 40, stem="up")
 
         def _setup_toolbar(self):
             top_bar = QWidget()
