@@ -404,12 +404,20 @@ def main():
             treble_item.setZValue(5)
 
         def _create_cursor(self):
-            self.cursor = QGraphicsRectItem(0, 0, 794, 40)
-            self.cursor.setBrush(QBrush(QColor(0, 0, 255, 50)))
-            self.cursor.setPen(QPen(Qt.NoPen))
-            self.cursor.setZValue(10)
-            self.cursor.setPos(0, 100)
+            self.cursor = QGraphicsSvgItem()
+            self.cursor.setSharedRenderer(self.renderer_up)
+            self.cursor.setScale(0.4)
+            self.cursor.setPos(10, 81.7)
+            self.cursor.setParentItem(self.paper)
+            self.cursor.setZValue(6)
             self.scene.addItem(self.cursor)
+
+            # self.cursor = QGraphicsRectItem(0, 0, 794, 40)
+            # self.cursor.setBrush(QBrush(QColor(0, 0, 255, 50)))
+            # self.cursor.setPen(QPen(Qt.NoPen))
+            # self.cursor.setZValue(10)
+            # self.cursor.setPos(0, 100)
+            # self.scene.addItem(self.cursor)
 
         def move_cursor_vertical(self, amount):
             if self.cursor:
