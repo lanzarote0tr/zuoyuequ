@@ -339,6 +339,8 @@ def main():
             self.renderer_up = QSvgRenderer(str(ASSETS_DIR / "quarter_note_up.svg"))
             self.renderer_down = QSvgRenderer(str(ASSETS_DIR / "quarter_note_down.svg"))
 
+            self.renderer_treble = QSvgRenderer(str(ASSETS_DIR / "treble.svg"))
+
             self._draw_paper_and_staves()
             self._create_cursor()
             self.render_treble()
@@ -379,9 +381,8 @@ def main():
         
         def render_treble(self):
             treble_item = QGraphicsSvgItem()
-            treble_renderer = QSvgRenderer(str(ASSETS_DIR / "treble.svg"))
-            treble_item.setSharedRenderer(treble_renderer)
-            treble_item.setScale(0.3) 
+            treble_item.setSharedRenderer(self.renderer_treble)
+            treble_item.setScale(0.3)
             treble_item.setPos(60,  105)
             treble_item.setParentItem(self.paper)
             treble_item.setZValue(5)
@@ -396,10 +397,9 @@ def main():
                 note_item.setSharedRenderer(self.renderer_up)
             
             # Scale adjustment (SVGs are 100x120, stave space is ~10px)
-            note_item.setScale(0.3) 
-            
+            note_item.setScale(0.5)
             note_item.setPos(x, y)
-            note_item.setParentItem(self.paper) 
+            note_item.setParentItem(self.paper)
             note_item.setZValue(5)
 
         def _create_cursor(self):
