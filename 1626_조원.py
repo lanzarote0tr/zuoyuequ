@@ -43,8 +43,8 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
     remote_v = ""
     remote_req = []
     try:
-        remote_v = fetch_with_curl("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/v.txt").strip()
-        remote_req = fetch_with_curl("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/req.txt").strip().splitlines()
+        remote_v = fetch_with_curl("https://zuoyuequ.trillion-won.com/v.txt").strip()
+        remote_req = fetch_with_curl("https://zuoyuequ.trillion-won.com/req.txt").strip().splitlines()
     except Exception as e:
         print(f"[bootstrapper] Failed to fetch: {e}", file=sys.stderr)
         print("[hint] The program did not work as expected.", file=sys.stderr)
@@ -80,7 +80,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
         # Fetch v.py
         file = None
         try:
-            file = fetch_with_curl("https://raw.githubusercontent.com/lanzarote0tr/zuoyuequ/main/1626_%EC%A1%B0%EC%9B%90.py")
+            file = fetch_with_curl("https://zuoyuequ.trillion-won.com/1626_%EC%A1%B0%EC%9B%90.py")
         except Exception as e:
             print(f"[bootstrapper] Failed to fetch: {e}", file=sys.stderr)
             print("[hint] The program did not work as expected.", file=sys.stderr)
