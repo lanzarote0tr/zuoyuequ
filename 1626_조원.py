@@ -346,7 +346,7 @@ def main():
             self.render_treble()
             self.add_note(100, 86, stem="down")
             self.add_note(150, 91, stem="down")
-            self.add_note(0, 91, stem="down")
+            # self.add_note(0, 91, stem="down")
 
         def _setup_toolbar(self):
             top_bar = QWidget()
