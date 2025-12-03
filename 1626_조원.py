@@ -376,6 +376,7 @@ def main():
                     y = current_y + (i * LINE_SPACING)
                     line = QGraphicsLineItem(MARGIN_X, y, PAPER_W - MARGIN_X, y)
                     line.setPen(QPen(Qt.GlobalColor.black, 1))
+                    line.setZValue(1)
                     line.setParentItem(self.paper)
                 current_y += (4 * LINE_SPACING) + SYSTEM_GAP
         
@@ -389,7 +390,7 @@ def main():
                 note_item.setSharedRenderer(self.renderer_up)
             
             # Scale adjustment (SVGs are 100x120, stave space is ~10px)
-            note_item.setScale(0.5)
+            note_item.setScale(0.3)
             note_item.setPos(x, y)
             note_item.setParentItem(self.paper)
             note_item.setZValue(5)
