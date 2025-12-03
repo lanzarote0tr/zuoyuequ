@@ -475,12 +475,12 @@ def main():
     def handle_global_command(cmd):
         if view_switcher.currentWidget() == score_editor:
             if cmd == "UP":
-                score_editor.move_cursor_vertical(-10)
+                score_editor.move_cursor_vertical(-5)
             elif cmd == "DOWN":
-                score_editor.move_cursor_vertical(10)
+                score_editor.move_cursor_vertical(5)
             elif cmd == "ENTER":
                 score_editor.add_note(score_editor.cursor.x(), score_editor.cursor.y(), stem="down")
-                score_editor.move_cursor_horizontal(10)
+                score_editor.move_cursor_horizontal(30)
 
     global_listener.command.connect(handle_global_command)
 
