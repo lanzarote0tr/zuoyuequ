@@ -277,6 +277,8 @@ def main():
                                        QGraphicsRectItem, QGraphicsLineItem, QPushButton)
         from PySide6.QtCore import Qt, QObject, QEvent, Signal
         from PySide6.QtGui import QKeySequence, QFont, QPainter, QBrush, QColor, QPen
+        from PySide6.QtSvgWidgets import QGraphicsSvgItem
+        from PySide6.QtSvg import QSvgRenderer
     except Exception as e:
         print(e)
         exception_importing("main")
@@ -334,8 +336,18 @@ def main():
             self.cursor = None 
             self.paper = None
             
+            # --- LOAD SVGS FROM FILE SYSTEM ---
+            # Assumes files exist at ASSETS_DIR
+            self.renderer_up = QSvgRenderer(str(ASSETS_DIR / "quarter_note_up.svg"))
+            self.renderer_down = QSvgRenderer(str(ASSETS_DIR / "quarter_note_down.svg"))
+
             self._draw_paper_and_staves()
             self._create_cursor()
+
+            # --- ADD DEMO NOTES ---
+            self.add_note(x=150, y=92, stem="up") 
+            self.add_note(x=200, y=82, stem="up")
+            self.add_note(x=250, y=140, stem="down")
 
         def _setup_toolbar(self):
             top_bar = QWidget()
@@ -367,6 +379,22 @@ def main():
                     line.setPen(QPen(Qt.GlobalColor.black, 1))
                     line.setParentItem(self.paper)
                 current_y += (4 * LINE_SPACING) + SYSTEM_GAP
+
+        def add_note(self, x, y, stem="up"):
+            note_item = QGraphicsSvgItem()
+            
+            # Select the correct renderer based on the argument
+            if stem == "down":
+                note_item.setSharedRenderer(self.renderer_down)
+            else:
+                note_item.setSharedRenderer(self.renderer_up)
+            
+            # Scale adjustment (SVGs are 100x120, stave space is ~10px)
+            note_item.setScale(0.3) 
+            
+            note_item.setPos(x, y)
+            note_item.setParentItem(self.paper) 
+            note_item.setZValue(5)
 
         def _create_cursor(self):
             self.cursor = QGraphicsRectItem(0, 0, 794, 40)
