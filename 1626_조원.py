@@ -344,8 +344,8 @@ def main():
             self._draw_paper_and_staves()
             self._create_cursor()
             self.render_treble()
-            self.add_note(100, 81.7, stem="down")
-            self.add_note(150, 86.7, stem="down")
+            self.add_note(100, 81.8, stem="down")
+            self.add_note(150, 86.8, stem="down")
             # self.add_note(0, 91, stem="down")
 
         def _setup_toolbar(self):
@@ -405,19 +405,12 @@ def main():
 
         def _create_cursor(self):
             self.cursor = QGraphicsSvgItem()
-            self.cursor.setSharedRenderer(self.renderer_up)
+            self.cursor.setSharedRenderer(self.renderer_down)
             self.cursor.setScale(0.4)
-            self.cursor.setPos(10, 81.7)
+            self.cursor.setPos(10, 81.8)
             self.cursor.setParentItem(self.paper)
             self.cursor.setZValue(6)
             self.scene.addItem(self.cursor)
-
-            # self.cursor = QGraphicsRectItem(0, 0, 794, 40)
-            # self.cursor.setBrush(QBrush(QColor(0, 0, 255, 50)))
-            # self.cursor.setPen(QPen(Qt.NoPen))
-            # self.cursor.setZValue(10)
-            # self.cursor.setPos(0, 100)
-            # self.scene.addItem(self.cursor)
 
         def move_cursor_vertical(self, amount):
             if self.cursor:
@@ -477,6 +470,9 @@ def main():
                 score_editor.move_cursor_vertical(-10)
             elif cmd == "DOWN":
                 score_editor.move_cursor_vertical(10)
+            elif cmd == "ENTER":
+                score_editor.add_note(score_editor.cursor.x(), score_editor.cursor.y(), stem="down")
+                score_editor.move_cursor_horizontal(10)
 
     global_listener.command.connect(handle_global_command)
 
