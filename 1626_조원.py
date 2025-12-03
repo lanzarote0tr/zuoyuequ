@@ -410,7 +410,7 @@ def main():
             self.cursor = QGraphicsSvgItem()
             self.cursor.setSharedRenderer(self.renderer_down)
             self.cursor.setScale(0.4)
-            self.cursor.setPos(10, 81.8)
+            self.cursor.setPos(50, 81.8)
             self.cursor.setParentItem(self.paper)
             self.cursor.setZValue(6)
             self.scene.addItem(self.cursor)
