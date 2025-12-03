@@ -298,6 +298,9 @@ def main():
                 elif key_str == 'Down':
                     self.command.emit("DOWN")
                     return True
+                elif key_str == 'Return' or key_str == 'Enter':
+                    self.command.emit("ENTER")
+                    return True
                 elif key_str == 'Esc':
                     app.quit()
                     return True
@@ -470,14 +473,12 @@ def main():
 
     # Connector
     def handle_global_command(cmd):
-        print("handle_global_command:", repr(cmd))
         if view_switcher.currentWidget() == score_editor:
             if cmd == "UP":
                 score_editor.move_cursor_vertical(-10)
             elif cmd == "DOWN":
                 score_editor.move_cursor_vertical(10)
             elif cmd == "ENTER":
-                print("asdf")
                 score_editor.add_note(score_editor.cursor.x(), score_editor.cursor.y(), stem="down")
                 score_editor.move_cursor_horizontal(10)
 
