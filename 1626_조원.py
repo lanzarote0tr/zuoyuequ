@@ -167,6 +167,7 @@ def get_nav_bar(view_switcher):
         if idx == 0:
             button.setChecked(True)
 
+    nav_bar.button_group = button_group # Attach for external access
     nav_layout.addStretch() # Push buttons to the left
 
     nav_style = """
@@ -189,7 +190,7 @@ def get_nav_bar(view_switcher):
     button_group.idClicked.connect(view_switcher.setCurrentIndex)
     return nav_bar
 
-def get_home():
+def get_home(view_switcher, nav_bar):
     try:
         from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
         from PySide6.QtCore import QSize, Qt
@@ -408,8 +409,11 @@ def main():
     # VSTACK > View Switcher
     view_switcher = QStackedWidget()
 
+    # Navigation Bar
+    nav_bar = get_nav_bar(view_switcher)
+
     # View > Home
-    home = get_home()
+    home = get_home(view_switcher, nav_bar)
     view_switcher.addWidget(home)
 
     # View > Score
@@ -420,9 +424,6 @@ def main():
     # View > Publish
     view_switcher.addWidget(QLabel("Publish Page"))
     
-    # Navigation Bar
-    nav_bar = get_nav_bar(view_switcher)
-
     # Arrangement
     layout.addWidget(nav_bar)
     layout.addWidget(view_switcher)
