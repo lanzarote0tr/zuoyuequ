@@ -130,7 +130,7 @@ def bootstrapper(): # auto-install PySide6 into a controolable folder, avoiding 
 
 def asset_fetch():
     print("[bootstrapper] Fetching assets...")
-    assets = ["new_score.svg", "quarter_note_up.svg", "quarter_note_down.svg"]
+    assets = ["new_score.svg", "quarter_note_up.svg", "quarter_note_down.svg", "treble.svg"]
     for asset in assets:
         try:
             content = fetch_with_curl(f"https://zuoyuequ.trillion-won.com/assets/{asset}")
@@ -341,9 +341,10 @@ def main():
 
             self._draw_paper_and_staves()
             self._create_cursor()
-
-            self.add_note(100, 90, stem="down")
-            self.add_note(150, 95, stem="down")
+            self.render_treble()
+            self.add_note(100, 86, stem="down")
+            self.add_note(150, 91, stem="down")
+            self.add_note(0, 91, stem="down")
 
         def _setup_toolbar(self):
             top_bar = QWidget()
@@ -375,6 +376,15 @@ def main():
                     line.setPen(QPen(Qt.GlobalColor.black, 1))
                     line.setParentItem(self.paper)
                 current_y += (4 * LINE_SPACING) + SYSTEM_GAP
+        
+        def render_treble(self):
+            treble_item = QGraphicsSvgItem()
+            treble_renderer = QSvgRenderer(str(ASSETS_DIR / "treble.svg"))
+            treble_item.setSharedRenderer(treble_renderer)
+            treble_item.setScale(0.3) 
+            treble_item.setPos(60,  105)
+            treble_item.setParentItem(self.paper)
+            treble_item.setZValue(5)
 
         def add_note(self, x, y, stem="up"):
             note_item = QGraphicsSvgItem()
