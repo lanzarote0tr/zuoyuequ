@@ -208,7 +208,7 @@ def get_home(view_switcher, nav_bar):
     home_layout.addWidget(scores_label)
 
     class ClickableButton(QWidget):
-        def __init__(self, icon_path, text, parent=None):
+        def __init__(self, parent=None):
             super().__init__(parent)
             self.setObjectName("ClickableButton")
             self.setAttribute(Qt.WA_StyledBackground, True)
@@ -237,9 +237,9 @@ def get_home(view_switcher, nav_bar):
             layout.setContentsMargins(24, 0, 0, 0)
             layout.setSpacing(16)
             icon_label = QLabel()
-            icon_pix = QIcon(str(icon_path)).pixmap(QSize(32, 50))
+            icon_pix = QIcon(str(ASSETS_DIR / "new_score.svg")).pixmap(QSize(32, 50))
             icon_label.setPixmap(icon_pix)
-            text_label = QLabel(text)
+            text_label = QLabel("New Score")
             text_label.setStyleSheet("font-size: 20px;")
             layout.addWidget(icon_label)
             layout.addWidget(text_label)
@@ -254,9 +254,7 @@ def get_home(view_switcher, nav_bar):
 
         def mousePressEvent(self, event: QMouseEvent):
             if event.button() == Qt.LeftButton:
-                print("New Score button clicked! Switching view...")
-                
-                # 1. Switch the StackedWidget to Index 1 (Score View)
+                # Switch the StackedWidget to Index 1 (Score View)
                 view_switcher.setCurrentIndex(1)
                 
                 # 2. Update the Nav Bar visuals so "Score" is selected
@@ -265,7 +263,7 @@ def get_home(view_switcher, nav_bar):
                     nav_bar.button_group.button(1).setChecked(True)
             
             event.accept()
-    new_score_button = ClickableButton(ASSETS_DIR / "new_score.svg", "New Score")
+    new_score_button = ClickableButton()
     home_layout.addWidget(new_score_button)
 
     home_layout.addStretch()
