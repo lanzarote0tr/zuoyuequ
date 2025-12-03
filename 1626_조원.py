@@ -379,14 +379,6 @@ def main():
                     line.setParentItem(self.paper)
                 current_y += (4 * LINE_SPACING) + SYSTEM_GAP
         
-        def render_treble(self):
-            treble_item = QGraphicsSvgItem()
-            treble_item.setSharedRenderer(self.renderer_treble)
-            treble_item.setScale(0.3)
-            treble_item.setPos(60,  105)
-            treble_item.setParentItem(self.paper)
-            treble_item.setZValue(5)
-
         def add_note(self, x, y, stem="up"):
             note_item = QGraphicsSvgItem()
             
@@ -401,6 +393,14 @@ def main():
             note_item.setPos(x, y)
             note_item.setParentItem(self.paper)
             note_item.setZValue(5)
+
+        def render_treble(self):
+            treble_item = QGraphicsSvgItem()
+            treble_item.setSharedRenderer(self.renderer_treble)
+            treble_item.setScale(0.3)
+            treble_item.setPos(60, 105)
+            treble_item.setParentItem(self.paper)
+            treble_item.setZValue(5)
 
         def _create_cursor(self):
             self.cursor = QGraphicsRectItem(0, 0, 794, 40)
