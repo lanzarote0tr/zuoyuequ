@@ -399,7 +399,7 @@ def main():
             treble_item = QGraphicsSvgItem()
             treble_item.setSharedRenderer(self.renderer_treble)
             treble_item.setScale(0.068)
-            treble_item.setPos(51, 93)
+            treble_item.setPos(51, 93.5)
             treble_item.setParentItem(self.paper)
             treble_item.setZValue(5)
 
